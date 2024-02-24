@@ -3,17 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Student;
+use App\Models\StudentImage;
 
-class StudentController extends Controller
+class StudentImageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $students = Student::all();
-        return response()->json($students);
+        //
     }
 
     /**
@@ -29,26 +28,17 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $existingStudent = Student::where('faith_id', $request->faith_id)->first();
+        $studentImage = new StudentImage;
+        $studentImage->faith_id = $request-> faith_id;
+        $studentImage->std_folder_url = $request->std_folder_url;
+        $studentImage->std_folder_img_url = $request->std_folder_img_url;
+        $studentImage->save();
 
-        if ($existingStudent){
-            return response()->json('Student Already Exists!',409);
-        }
-        else{
-            $students = new Student;
-            $students->faith_id = $request->faith_id;
-            $students->std_lname = $request->std_lname;
-            $students->std_fname = $request->std_fname;
-            $students->std_course = $request->std_course;
-            $students->std_yrSection = $request->std_yrSection;
-            $students->save();
-
-            $message=(object)[
-                "status"=>"1",
-                "message"=> "Successfully Added ". $request->faith_id
-            ];
-            return response()->json($message);
-        }
+        $message=(object)[
+            "status"=>"1",
+            "message"=> "Successfully Added Image"
+        ];
+        return response()->json($message);
     }
 
     /**
