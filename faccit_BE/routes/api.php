@@ -22,5 +22,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
 Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
 
+Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
+
+Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+Route::post('users', [App\Http\Controllers\UserController::class, 'store']);
+
 Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
 Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
