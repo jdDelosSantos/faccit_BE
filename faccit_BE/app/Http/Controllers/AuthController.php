@@ -9,91 +9,83 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-
-
-    public function login(Request $request)
+    /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
+    public function __construct()
     {
-    if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        $this->middleware('auth:api', ['except' => ['login']]);
+    }
+
+    /**
+     * Get a JWT via given credentials.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login()
+    {
+        $credentials = request(['email', 'password']);
+
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Wrong Email/Password!'], 401);
+        }
         $user = auth()->user();
 
-        // Check user role directly from the database
-        if ($user->role === 'super_admin' || $user->role === 'admin') {
-            return response()->json([
-                'firstname' => $user->firstname,
-                'surname' => $user->surname,
-                'email' => $user->email,
-                'role' => $user->role
-            ]);
-        }  else {
-            return response()->json(['error' => 'Invalid role assigned to user'], 400);
-        }
-        // if ($user->role === 'super_admin' || $user->role === 'admin') {
-        //     $token = $user->createToken('Super Admin Token')->plainTextToken;
-        // } elseif ($user->role === 'admin') {
-        //     return response()->json($user);
-        //     $token = $user->createToken('Admin Token')->plainTextToken;
-        //     // $token = auth()->login($user)
-        // } else {
-        //     return response()->json(['error' => 'Invalid role assigned to user'], 400);
-        // }
+        $token = auth()->claims(['surname' => $user->surname, 'firstname'=> $user->firstname, 'role'=>$user->role])->attempt($credentials);
+        // $user = User::first();
+        // $token = auth()->login($user);
 
-    } else {
-        return response()->json(['error' => 'Invalid credentials'], 401);
-    }
-    }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+        return response()->json($token);
+        // return $this->respondWithToken($token);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function me()
     {
-        //
+        return response()->json(auth()->user());
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Log the user out (Invalidate the token).
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function logout()
     {
-        //
+        auth()->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
     }
 
     /**
-     * Display the specified resource.
+     * Refresh a token.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(string $id)
+    public function refresh()
     {
-        //
+        return $this->respondWithToken(auth()->refresh());
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Get the token array structure.
+     *
+     * @param  string $token
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit(string $id)
+    protected function respondWithToken($token)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,15 +15,32 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+
+Route::group([
+
+    'middleware' => 'api',
+    'prefix' => 'auth'
+
+], function ($router) {
+
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::post('me', [AuthController::class, 'me']);
+
+});
+
 
 
 Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
 Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
 
-Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
+// Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
 
 Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
 Route::post('users', [App\Http\Controllers\UserController::class, 'store']);
