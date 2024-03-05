@@ -23,7 +23,7 @@ Route::middleware('auth')->get('/user', function (Request $request) {
 
 Route::group([
 
-    'middleware' => 'api',
+    'middleware' => 'auth',
     'prefix' => 'auth'
 
 ], function ($router) {
@@ -33,17 +33,25 @@ Route::group([
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
 
+    Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
+    Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
+    Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+    Route::post('users', [App\Http\Controllers\UserController::class, 'store']);
+
+    Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
+    Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
+});
+
+Route::group([
+
+    'middleware' => 'api',
+    'prefix' => 'auth'
+
+], function ($router) {
+    Route::post('login', [AuthController::class, 'login']);
 });
 
 
 
-Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
-Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
 
-// Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
 
-Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
-Route::post('users', [App\Http\Controllers\UserController::class, 'store']);
-
-Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
-Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
