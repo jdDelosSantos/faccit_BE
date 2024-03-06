@@ -33,13 +33,17 @@ Route::group([
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
 
-    Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
-    Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
     Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
     Route::post('users', [App\Http\Controllers\UserController::class, 'store']);
 
+    Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
+    Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
+
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
     Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
+
+    Route::get('courses', [App\Http\Controllers\CourseController::class, 'index']);
+    Route::post('courses', [App\Http\Controllers\CourseController::class, 'store']);
 });
 
 Route::group([
