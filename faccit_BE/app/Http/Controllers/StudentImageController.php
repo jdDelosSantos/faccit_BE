@@ -60,9 +60,18 @@ class StudentImageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $faith_id)
     {
-        //
+        $updateStudentImage = StudentImage::where('faith_id', $faith_id)->first();
+        $updateStudentImage->std_folder_url = $request->std_folder_url;
+        $updateStudentImage->std_folder_img_url = $request->std_folder_img_url;
+        $updateStudentImage->save();
+
+        $message=(object)[
+            "status"=>"1",
+            "message"=> "Successfully Updated Images"
+        ];
+        return response()->json($message);
     }
 
     /**
@@ -71,5 +80,18 @@ class StudentImageController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getStudentImages(Request $request)
+    {
+        try {
+        // Retrieve only 'student_id' and 'data_url' columns from the database
+        $studentImages = StudentImage::where('faith_id',  $request->faith_id)->select('std_folder_url', 'std_folder_img_url')->get();
+        // select('student_id', 'data_url')->get();
+        // Return the specific data to the frontend
+        return response()->json($studentImages);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching data URLs'], 500);
+        }
     }
 }

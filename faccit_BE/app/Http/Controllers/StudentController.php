@@ -71,9 +71,21 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $faith_id)
     {
-        //
+        $updateStudent = Student::where('faith_id', $faith_id)->first();
+        $updateStudent->std_fname = $request->std_fname;
+        $updateStudent->std_lname = $request->std_lname;
+        $updateStudent->std_course = $request->std_course;
+        $updateStudent->std_level = $request->std_level;
+        $updateStudent->std_section = $request->std_section;
+        $updateStudent->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Updated ".$faith_id
+        ];
+        return response()->json($message);
     }
 
     /**
