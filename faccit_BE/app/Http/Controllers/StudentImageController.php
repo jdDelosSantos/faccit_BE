@@ -94,4 +94,14 @@ class StudentImageController extends Controller
             return response()->json(['error' => 'Error fetching data URLs'], 500);
         }
     }
+
+    public function getImagesForNode()
+    {
+        try {
+            $studentImages = StudentImage::select('faith_id', 'std_folder_url', 'std_folder_img_url')->get();
+        return response()->json($studentImages);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching data URLs'], 500);
+        }
+    }
 }

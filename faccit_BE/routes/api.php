@@ -57,6 +57,7 @@ Route::group([
 
 ], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
+    Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'getImagesForNode']);
 });
 
 
