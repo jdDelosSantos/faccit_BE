@@ -46,8 +46,15 @@ Route::group([
 
     Route::post('student_img_url', [App\Http\Controllers\StudentImageController::class, 'getStudentImages']);
 
+    Route::get('colleges', [App\Http\Controllers\CollegeController::class, 'index']);
+    Route::post('colleges', [App\Http\Controllers\CollegeController::class, 'store']);
+
     Route::get('courses', [App\Http\Controllers\CourseController::class, 'index']);
     Route::post('courses', [App\Http\Controllers\CourseController::class, 'store']);
+
+    Route::get('subjects', [App\Http\Controllers\SubjectController::class, 'index']);
+    Route::post('subjects', [App\Http\Controllers\SubjectController::class, 'store']);
+    // Route::put('update_students/{faith_id}', [App\Http\Controllers\SubjectController::class, 'update']);
 });
 
 Route::group([

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Course;
+use App\Models\College;
 
-class CourseController extends Controller
+class CollegeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $courses = Course::all();
-        return response()->json($courses);
+        $colleges = College::all();
+        return response()->json($colleges);
     }
 
     /**
@@ -29,25 +29,24 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        $existingCourse = Course::where('course_code', $request->course_code)->first();
+        $existingCollege = College::where('college_name', $request->college_name)->first();
 
-        if ($existingCourse) {
-            $courseCode = $existingCourse->course_code;
+        if ($existingCollege) {
+            $collegeName = $existingCollege->college_name; // Assuming 'name' is the property for college name
             return response()->json([
-              'message' => "Error! {$courseCode} Already Exists!",
+              'message' => "Error! {$collegeName} Already Exists!",
             ], 409);
           }
         else{
-            $courses = new Course;
-            $courses->course_code = $request->course_code;
-            $courses->course_name = $request->course_name;
-            $courses->course_description = $request->course_description;
-            $courses->course_college = $request->course_college;
-            $courses->save();
+            $colleges = new College;
+            $colleges->college_name = $request->college_name;
+            $colleges->college_description = $request->college_description;
+
+            $colleges->save();
 
             $message=(object)[
                 "status"=>"1",
-                "message"=> "Successfully Added ". $request->course_name
+                "message"=> "Successfully Added ". $request->college_name
             ];
             return response()->json($message);
         }

@@ -31,9 +31,12 @@ class StudentController extends Controller
     {
         $existingStudent = Student::where('faith_id', $request->faith_id)->first();
 
-        if ($existingStudent){
-            return response()->json(['message' => 'Student Already Exists!'], 409);
-        }
+        if ($existingStudent) {
+            $studentID = $existingStudent->faith_id;
+            return response()->json([
+              'message' => "Error! {$studentID} Already Exists!",
+            ], 409);
+          }
         else{
             $students = new Student;
             $students->faith_id = $request->faith_id;

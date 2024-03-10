@@ -63,15 +63,29 @@ class StudentImageController extends Controller
     public function update(Request $request, string $faith_id)
     {
         $updateStudentImage = StudentImage::where('faith_id', $faith_id)->first();
-        $updateStudentImage->std_folder_url = $request->std_folder_url;
-        $updateStudentImage->std_folder_img_url = $request->std_folder_img_url;
-        $updateStudentImage->save();
+        // if(!$updateStudentImage){
+        // $studentImage = new StudentImage;
+        // $studentImage->faith_id = $request-> faith_id;
+        // $studentImage->std_folder_url = $request->std_folder_url;
+        // $studentImage->std_folder_img_url = $request->std_folder_img_url;
+        // $studentImage->save();
 
-        $message=(object)[
-            "status"=>"1",
-            "message"=> "Successfully Updated Images"
-        ];
-        return response()->json($message);
+        // $message=(object)[
+        //     "status"=>"1",
+        //     "message"=> "Successfully Added Image"
+        // ];
+        // return response()->json($message);
+        // } else{
+            $updateStudentImage->std_folder_url = $request->std_folder_url;
+            $updateStudentImage->std_folder_img_url = $request->std_folder_img_url;
+            $updateStudentImage->save();
+
+            $message=(object)[
+                "status"=>"1",
+                "message"=> "Successfully Updated Images"
+            ];
+            return response()->json($message);
+        // }
     }
 
     /**

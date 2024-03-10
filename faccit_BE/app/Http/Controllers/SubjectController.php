@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Course;
+use App\Models\Subject;
 
-class CourseController extends Controller
+class SubjectController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $courses = Course::all();
-        return response()->json($courses);
+        $subjects = Subject::all();
+        return response()->json($subjects);
     }
 
     /**
@@ -29,25 +29,27 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        $existingCourse = Course::where('course_code', $request->course_code)->first();
+        $existingSubject = Subject::where('subject_code', $request->subject_code)->first();
 
-        if ($existingCourse) {
-            $courseCode = $existingCourse->course_code;
+        if ($existingSubject) {
+            $subjectCode = $existingSubject->subject_code;
             return response()->json([
-              'message' => "Error! {$courseCode} Already Exists!",
+              'message' => "Error! {$subjectCode} Already Exists!",
             ], 409);
           }
         else{
-            $courses = new Course;
-            $courses->course_code = $request->course_code;
-            $courses->course_name = $request->course_name;
-            $courses->course_description = $request->course_description;
-            $courses->course_college = $request->course_college;
-            $courses->save();
+            $subjects = new Subject;
+            $subjects->subject_code = $request->subject_code;
+            $subjects->subject_name = $request->subject_name;
+            $subjects->subject_description = $request->subject_description;
+            $subjects->subject_day = $request->subject_day;
+            $subjects->start_time = $request->start_time;
+            $subjects->end_time = $request->end_time;
+            $subjects->save();
 
             $message=(object)[
                 "status"=>"1",
-                "message"=> "Successfully Added ". $request->course_name
+                "message"=> "Successfully Added ". $request->subject_name
             ];
             return response()->json($message);
         }
