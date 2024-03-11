@@ -33,12 +33,16 @@ class AuthController extends Controller
         }
         $user = auth()->user();
 
-        $token = auth()->claims(['surname' => $user->surname, 'firstname'=> $user->firstname, 'role'=>$user->role])->attempt($credentials);
-        // $user = User::first();
-        // $token = auth()->login($user);
+        // Check if the user is inactive
+    if ($user->user_status === 'Inactive') {
+        return response()->json(['error' => 'User is Deactivated!'], 403); // 403 Forbidden
+    }
+
+        $token = auth()->claims(['user_lastname' => $user->user_lastname, 'user_firstname'=> $user->user_firstname, 'role'=>$user->role])->attempt($credentials);
+
 
         return response()->json($token);
-        // return $this->respondWithToken($token);
+
     }
 
     /**

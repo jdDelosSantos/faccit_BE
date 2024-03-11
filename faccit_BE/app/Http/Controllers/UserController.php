@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class UserController extends Controller
 {
@@ -13,8 +13,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
-        return response()->json($users);
+        $professors = User::all();
+        return response()->json($professors);
     }
 
     /**
@@ -31,15 +31,19 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $users = new User;
-        $users->surname = $request->surname;
-        $users->firstname = $request->firstname;
+        $users->user_lastname = $request->user_lastname;
+        $users->user_firstname = $request->user_firstname;
         $users->email= $request->email;
-        $password = $request->password;
+        $password = "TempPassword123";
         $users->password = Hash::make($password);
-        $users->role = $request->role;
+        $users->role = "admin";
         $users->save();
 
-        return response()->json("Successfully Added User!");
+        $message=(object)[
+            "status"=>"1",
+            "message"=> "Successfully Added ". $request->faith_id
+        ];
+        return response()->json($message);
     }
 
     /**
