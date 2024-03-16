@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\ProfessorImage;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -59,5 +60,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function professorImages()
+    {
+        return $this->hasMany(ProfessorImage::class, 'prof_id', 'prof_id');
     }
 }

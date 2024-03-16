@@ -35,6 +35,7 @@ Route::group([
 
     Route::get('professors', [App\Http\Controllers\UserController::class, 'index']);
     Route::post('professors', [App\Http\Controllers\UserController::class, 'store']);
+    Route::put('update_professors/{prof_id}', [App\Http\Controllers\UserController::class, 'update']);
 
     Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
     Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
@@ -43,8 +44,14 @@ Route::group([
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
     Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
     Route::put('student_images/{faith_id}', [App\Http\Controllers\StudentImageController::class, 'update']);
-
     Route::post('student_img_url', [App\Http\Controllers\StudentImageController::class, 'getStudentImages']);
+
+    Route::get('prof_images', [App\Http\Controllers\ProfessorImageController::class, 'index']);
+    Route::post('prof_images', [App\Http\Controllers\ProfessorImageController::class, 'store']);
+
+    Route::put('professor_images/{prof_id}', [App\Http\Controllers\ProfessorImageController::class, 'update']);
+    Route::post('prof_img_url', [App\Http\Controllers\ProfessorImageController::class, 'getProfessorImages']);
+
 
     Route::get('colleges', [App\Http\Controllers\CollegeController::class, 'index']);
     Route::post('colleges', [App\Http\Controllers\CollegeController::class, 'store']);
@@ -58,13 +65,12 @@ Route::group([
 });
 
 Route::group([
-
     'middleware' => 'api',
     'prefix' => 'auth'
-
 ], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'getImagesForNode']);
+    Route::post('superadmin', [App\Http\Controllers\UserController::class, 'storeNewSuperAdmin']);
 });
 
 
