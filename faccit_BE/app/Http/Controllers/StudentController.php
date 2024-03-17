@@ -12,8 +12,10 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = Student::all();
-        return response()->json($students);
+        $students = Student::withCount('studentImages')
+                      ->get();
+
+    return response()->json($students);
     }
 
     /**
