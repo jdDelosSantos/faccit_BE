@@ -42,9 +42,25 @@ class SubjectController extends Controller
             $subjects->subject_code = $request->subject_code;
             $subjects->subject_name = $request->subject_name;
             $subjects->subject_description = $request->subject_description;
+             // Check if prof_id is not null before assigning
+        if ($request->prof_id !== null) {
+            $subjects->prof_id = $request->prof_id;
+        }
+
+        // Check if subject_day is not null before assigning
+        if ($request->subject_day !== null) {
             $subjects->subject_day = $request->subject_day;
+        }
+
+        // Check if start_time is not null before assigning
+        if ($request->start_time !== null) {
             $subjects->start_time = $request->start_time;
+        }
+
+        // Check if end_time is not null before assigning
+        if ($request->end_time !== null) {
             $subjects->end_time = $request->end_time;
+        }
             $subjects->save();
 
             $message=(object)[
@@ -74,9 +90,41 @@ class SubjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $subject_code)
     {
-        //
+        $updateSubject = Subject::where('subject_code', $subject_code)->first();
+
+        if(!$updateSubject){
+            return response()->json(['error' => 'Missing Subject Code!'], 404);
+        }
+        $updateSubject->subject_code = $request->subject_code;
+        $updateSubject->subject_name = $request->subject_name;
+        $updateSubject->subject_description = $request->subject_description;
+        if ($request->prof_id !== null) {
+            $updateSubject->prof_id = $request->prof_id;
+        }
+
+        // Check if subject_day is not null before assigning
+        if ($request->subject_day !== null) {
+            $updateSubject->subject_day = $request->subject_day;
+        }
+
+        // Check if start_time is not null before assigning
+        if ($request->start_time !== null) {
+            $updateSubject->start_time = $request->start_time;
+        }
+
+        // Check if end_time is not null before assigning
+        if ($request->end_time !== null) {
+            $updateSubject->end_time = $request->end_time;
+        }
+        $updateSubject->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Updated ".$subject_code
+        ];
+        return response()->json($message);
     }
 
     /**

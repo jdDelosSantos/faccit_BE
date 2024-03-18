@@ -12,13 +12,21 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
+    {
     $professors = User::where('role', 'admin')
                       ->withCount('professorImages')
                       ->get();
-
     return response()->json($professors);
-}
+    }
+
+    public function getProfessors()
+    {
+    $professors = User::where('role', 'admin')
+    ->where('user_status', 'Active')
+    ->select('user_lastname', 'user_firstname','prof_id')
+    ->get();
+    return response()->json($professors);
+    }
 
     /**
      * Show the form for creating a new resource.

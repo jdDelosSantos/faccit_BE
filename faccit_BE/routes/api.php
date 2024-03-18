@@ -34,6 +34,7 @@ Route::group([
     Route::post('me', [AuthController::class, 'me']);
 
     Route::get('professors', [App\Http\Controllers\UserController::class, 'index']);
+    Route::get('getProfessors', [App\Http\Controllers\UserController::class, 'getProfessors']);
     Route::post('professors', [App\Http\Controllers\UserController::class, 'store']);
     Route::put('update_professors/{prof_id}', [App\Http\Controllers\UserController::class, 'update']);
 
@@ -61,7 +62,7 @@ Route::group([
 
     Route::get('subjects', [App\Http\Controllers\SubjectController::class, 'index']);
     Route::post('subjects', [App\Http\Controllers\SubjectController::class, 'store']);
-    // Route::put('update_students/{faith_id}', [App\Http\Controllers\SubjectController::class, 'update']);
+    Route::put('update_subjects/{subject_code}', [App\Http\Controllers\SubjectController::class, 'update']);
 });
 
 Route::group([
