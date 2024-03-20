@@ -61,6 +61,7 @@ Route::group([
     Route::post('courses', [App\Http\Controllers\CourseController::class, 'store']);
 
     Route::get('subjects', [App\Http\Controllers\SubjectController::class, 'index']);
+    Route::get('profSubjects/{prof_id}', [App\Http\Controllers\SubjectController::class, 'getSubjectsForProfessor']);
     Route::post('subjects', [App\Http\Controllers\SubjectController::class, 'store']);
     Route::put('update_subjects/{subject_code}', [App\Http\Controllers\SubjectController::class, 'update']);
 });

@@ -134,4 +134,11 @@ class SubjectController extends Controller
     {
         //
     }
+
+    public function getSubjectsForProfessor($profId)
+    {
+        $subjects = Subject::where('prof_id', $profId)->get();
+
+        return response()->json($subjects);
+    }
 }

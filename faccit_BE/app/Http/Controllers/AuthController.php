@@ -38,7 +38,7 @@ class AuthController extends Controller
         return response()->json(['error' => 'User is Deactivated!'], 403); // 403 Forbidden
     }
 
-        $token = auth()->claims(['user_lastname' => $user->user_lastname, 'user_firstname'=> $user->user_firstname, 'role'=>$user->role])->attempt($credentials);
+        $token = auth()->claims(['user_lastname' => $user->user_lastname, 'user_firstname'=> $user->user_firstname, 'role'=>$user->role,'prof_id' => $user->prof_id])->attempt($credentials);
 
 
         return response()->json($token);
