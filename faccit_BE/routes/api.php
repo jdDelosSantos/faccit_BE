@@ -37,10 +37,16 @@ Route::group([
     Route::get('getProfessors', [App\Http\Controllers\UserController::class, 'getProfessors']);
     Route::post('professors', [App\Http\Controllers\UserController::class, 'store']);
     Route::put('update_professors/{prof_id}', [App\Http\Controllers\UserController::class, 'update']);
+    Route::put('prof_deactivate/{prof_id}', [App\Http\Controllers\UserController::class, 'deactivateUser']);
+    Route::put('prof_activate/{prof_id}', [App\Http\Controllers\UserController::class, 'activateUser']);
+
 
     Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
     Route::post('students', [App\Http\Controllers\StudentController::class, 'store']);
     Route::put('update_students/{faith_id}', [App\Http\Controllers\StudentController::class, 'update']);
+    Route::put('student_deactivate/{faith_id}', [App\Http\Controllers\StudentController::class, 'deactivateStudent']);
+    Route::put('student_activate/{faith_id}', [App\Http\Controllers\StudentController::class, 'activateStudent']);
+
 
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
     Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
@@ -56,14 +62,21 @@ Route::group([
 
     Route::get('colleges', [App\Http\Controllers\CollegeController::class, 'index']);
     Route::post('colleges', [App\Http\Controllers\CollegeController::class, 'store']);
+    Route::put('college_deactivate/{college_name}', [App\Http\Controllers\CollegeController::class, 'deactivateCollege']);
+    Route::put('college_activate/{college_name}', [App\Http\Controllers\CollegeController::class, 'activateCollege']);
 
     Route::get('courses', [App\Http\Controllers\CourseController::class, 'index']);
     Route::post('courses', [App\Http\Controllers\CourseController::class, 'store']);
+    Route::put('course_deactivate/{course_code}', [App\Http\Controllers\CourseController::class, 'deactivateCourse']);
+    Route::put('course_activate/{course_code}', [App\Http\Controllers\CourseController::class, 'activateCourse']);
 
     Route::get('subjects', [App\Http\Controllers\SubjectController::class, 'index']);
     Route::get('profSubjects/{prof_id}', [App\Http\Controllers\SubjectController::class, 'getSubjectsForProfessor']);
     Route::post('subjects', [App\Http\Controllers\SubjectController::class, 'store']);
     Route::put('update_subjects/{subject_code}', [App\Http\Controllers\SubjectController::class, 'update']);
+    Route::put('subject_deactivate/{subject_code}', [App\Http\Controllers\SubjectController::class, 'deactivateSubject']);
+    Route::put('subject_activate/{subject_code}', [App\Http\Controllers\SubjectController::class, 'activateSubject']);
+
 });
 
 Route::group([

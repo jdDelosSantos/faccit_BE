@@ -77,6 +77,32 @@ class CourseController extends Controller
         //
     }
 
+    public function deactivateCourse(Request $request, string $course_code)
+    {
+        $deactivateCourse = Course::where('course_code', $course_code)->first();
+        $deactivateCourse->course_status = $request->course_status;
+        $deactivateCourse->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Disabled ".$course_code
+        ];
+        return response()->json($message);
+    }
+
+    public function activateCourse(Request $request, string $course_code)
+    {
+        $activateCourse = Course::where('course_code', $course_code)->first();
+        $activateCourse->course_status = $request->course_status;
+        $activateCourse->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Reactivated ".$course_code
+        ];
+        return response()->json($message);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

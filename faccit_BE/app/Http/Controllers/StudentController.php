@@ -93,6 +93,32 @@ class StudentController extends Controller
         return response()->json($message);
     }
 
+    public function deactivateStudent(Request $request, string $faith_id)
+    {
+        $deactivateStudent = Student::where('faith_id', $faith_id)->first();
+        $deactivateStudent->std_status = $request->std_status;
+        $deactivateStudent->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Disabled ".$faith_id
+        ];
+        return response()->json($message);
+    }
+
+    public function activateStudent(Request $request, string $faith_id)
+    {
+        $activateStudent = Student::where('faith_id', $faith_id)->first();
+        $activateStudent->std_status = $request->std_status;
+        $activateStudent->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Reactivated ".$faith_id
+        ];
+        return response()->json($message);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

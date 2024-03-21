@@ -127,6 +127,32 @@ class SubjectController extends Controller
         return response()->json($message);
     }
 
+    public function deactivateSubject(Request $request, string $subject_code)
+    {
+        $deactivateSubject = Subject::where('subject_code', $subject_code)->first();
+        $deactivateSubject->subject_status = $request->subject_status;
+        $deactivateSubject->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Disabled ".$subject_code
+        ];
+        return response()->json($message);
+    }
+
+    public function activateSubject(Request $request, string $subject_code)
+    {
+        $activateSubject = Subject::where('subject_code', $subject_code)->first();
+        $activateSubject->subject_status = $request->subject_status;
+        $activateSubject->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Reactivated ".$subject_code
+        ];
+        return response()->json($message);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

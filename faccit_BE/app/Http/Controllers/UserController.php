@@ -22,8 +22,7 @@ class UserController extends Controller
     public function getProfessors()
     {
     $professors = User::where('role', 'admin')
-    ->where('user_status', 'Active')
-    ->select('user_lastname', 'user_firstname','prof_id')
+    ->select('user_lastname', 'user_firstname','prof_id', 'user_status')
     ->get();
     return response()->json($professors);
     }
@@ -107,6 +106,32 @@ class UserController extends Controller
             return response()->json($message);
         }
 
+    }
+
+    public function deactivateUser(Request $request, string $prof_id)
+    {
+        $deactivateUser = User::where('prof_id', $prof_id)->first();
+        $deactivateUser->user_status = $request->user_status;
+        $deactivateUser->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Disabled ".$prof_id
+        ];
+        return response()->json($message);
+    }
+
+    public function activateUser(Request $request, string $prof_id)
+    {
+        $deactivateUser = User::where('prof_id', $prof_id)->first();
+        $deactivateUser->user_status = $request->user_status;
+        $deactivateUser->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Reactivated ".$prof_id
+        ];
+        return response()->json($message);
     }
 
     /**
