@@ -72,9 +72,21 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $course_code)
     {
-        //
+        $updateCourse = Course::where('course_code', $course_code)->first();
+
+        $updateCourse->course_name = $request->course_name;
+        $updateCourse->course_description = $request->course_description;
+        $updateCourse->course_college = $request->course_college;
+
+        $updateCourse->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Updated ".$course_code
+        ];
+        return response()->json($message);
     }
 
     public function deactivateCourse(Request $request, string $course_code)

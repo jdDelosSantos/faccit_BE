@@ -73,9 +73,19 @@ class CollegeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $college_name)
     {
-        //
+        $updateCollege = College::where('college_name', $college_name)->first();
+
+        $updateCollege->college_description = $request->college_description;
+
+        $updateCollege->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Updated ".$college_name
+        ];
+        return response()->json($message);
     }
 
     public function deactivateCollege(Request $request, string $college_name)
