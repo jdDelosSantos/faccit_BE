@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\SubjectStudent;
+
+class SubjectStudentController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request){
+
+    }
+
+    public function createSubjectStudents(Request $request, string $subject_code)
+    {
+        $selectedStudents = $request->all();
+        $errors = [];
+        foreach ($selectedStudents as $studentData) {
+            $existingStudent = SubjectStudent::where('faith_id', $studentData['faith_id'])
+                                     ->where('subject_code', $subject_code)
+                                     ->first();
+            if (!$existingStudent){
+                $student = new SubjectStudent();
+            $student->subject_code = $subject_code; // Use $subject_code directly
+            $student->faith_id = $studentData['faith_id']; // Use array access []
+            $student->std_lname = $studentData['std_lname']; // Use array access []
+            $student->std_fname = $studentData['std_fname']; // Use array access []
+            $student->std_course = $studentData['std_course']; // Use array access []
+            $student->std_level = $studentData['std_level']; // Use array access []
+            $student->std_section = $studentData['std_section']; // Use array access []
+            $student->save();
+        } else if ($existingStudent){
+            $errorMessage = "Error! Student with ID {$studentData['faith_id']} already enrolled in subject {$subject_code}";
+            $errors[] = $errorMessage;
+        }
+    }
+    if (count($errors) > 0) {
+        return response()->json([
+            'message' => 'Some students were not added due to Existing Records.',
+            'errors' => $errors
+        ], 209);
+    }
+    return response()->json(['message' => 'Selected students saved successfully'], 200);
+    }
+
+
+
+    public function getSubjectStudents(string $subject_code){
+        $subjectStudents = SubjectStudent::where('subject_code', $subject_code)->get();
+        return response()->json($subjectStudents);
+    }
+
+
+    public function removeSubjectStudents(Request $request, $subject_code)
+{
+    // Assuming the request body contains an array of objects with IDs of students to be removed
+    $studentsToRemove = $request->all();
+
+    // Extract student IDs from the array
+    $studentIds = array_column($studentsToRemove, 'id');
+
+    // Delete the students with the given IDs
+    $deletedCount = SubjectStudent::whereIn('id', $studentIds)->delete();
+
+    return response()->json([
+        'message' => 'Students deleted successfully',
+        'deleted_count' => $deletedCount,
+    ]);
+}
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+}

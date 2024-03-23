@@ -59,7 +59,6 @@ Route::group([
     Route::put('professor_images/{prof_id}', [App\Http\Controllers\ProfessorImageController::class, 'update']);
     Route::post('prof_img_url', [App\Http\Controllers\ProfessorImageController::class, 'getProfessorImages']);
 
-
     Route::get('colleges', [App\Http\Controllers\CollegeController::class, 'index']);
     Route::post('colleges', [App\Http\Controllers\CollegeController::class, 'store']);
     Route::put('update_college/{college_name}', [App\Http\Controllers\CollegeController::class, 'update']);
@@ -79,6 +78,9 @@ Route::group([
     Route::put('subject_deactivate/{subject_code}', [App\Http\Controllers\SubjectController::class, 'deactivateSubject']);
     Route::put('subject_activate/{subject_code}', [App\Http\Controllers\SubjectController::class, 'activateSubject']);
 
+    Route::post('create_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'createSubjectStudents']);
+    Route::get('get_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'getSubjectStudents']);
+    Route::delete('remove_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'removeSubjectStudents']);
 });
 
 Route::group([
