@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string("college_name")->unique();
             $table->string("college_description");
+            $table->string("college_status")->default("Active");
             $table->timestamps();
         });
     }

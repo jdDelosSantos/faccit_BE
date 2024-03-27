@@ -67,20 +67,32 @@ Route::group([
 
     Route::get('courses', [App\Http\Controllers\CourseController::class, 'index']);
     Route::post('courses', [App\Http\Controllers\CourseController::class, 'store']);
-    Route::put('update_course/{course_code}', [App\Http\Controllers\CourseController::class, 'update']);
-    Route::put('course_deactivate/{course_code}', [App\Http\Controllers\CourseController::class, 'deactivateCourse']);
-    Route::put('course_activate/{course_code}', [App\Http\Controllers\CourseController::class, 'activateCourse']);
+    Route::put('update_course/{course_name}', [App\Http\Controllers\CourseController::class, 'update']);
+    Route::put('course_deactivate/{course_name}', [App\Http\Controllers\CourseController::class, 'deactivateCourse']);
+    Route::put('course_activate/{course_name}', [App\Http\Controllers\CourseController::class, 'activateCourse']);
 
-    Route::get('subjects', [App\Http\Controllers\SubjectController::class, 'index']);
-    Route::get('profSubjects/{prof_id}', [App\Http\Controllers\SubjectController::class, 'getSubjectsForProfessor']);
-    Route::post('subjects', [App\Http\Controllers\SubjectController::class, 'store']);
-    Route::put('update_subjects/{subject_code}', [App\Http\Controllers\SubjectController::class, 'update']);
-    Route::put('subject_deactivate/{subject_code}', [App\Http\Controllers\SubjectController::class, 'deactivateSubject']);
-    Route::put('subject_activate/{subject_code}', [App\Http\Controllers\SubjectController::class, 'activateSubject']);
+    Route::get('classes', [App\Http\Controllers\ClassController::class, 'index']);
+    Route::post('classes', [App\Http\Controllers\ClassController::class, 'store']);
+    Route::get('profClasses/{prof_id}', [App\Http\Controllers\ClassController::class, 'getClassesForProfessor']);
+    Route::put('update_classes/{class_code}', [App\Http\Controllers\ClassController::class, 'update']);
+    Route::put('class_disable/{class_code}', [App\Http\Controllers\ClassController::class, 'disableClass']);
+    Route::put('class_enable/{class_code}', [App\Http\Controllers\ClassController::class, 'enableClass']);
+
+    Route::get('class_schedule', [App\Http\Controllers\ClassScheduleController::class, 'index']);
+    Route::post('class_schedule', [App\Http\Controllers\ClassScheduleController::class, 'store']);
+    Route::put('update_class_schedule/{id}', [App\Http\Controllers\ClassScheduleController::class, 'update']);
+    Route::delete('delete_class_schedule/{id}', [App\Http\Controllers\ClassScheduleController::class, 'destroy']);
+
+
+    Route::post('create_class_students/{class_code}', [App\Http\Controllers\ClassStudentController::class, 'createClassStudents']);
+    Route::delete('remove_class_students/{class_code}', [App\Http\Controllers\ClassStudentController::class, 'removeClassStudents']);
+    Route::get('get_class_students/{class_code}', [App\Http\Controllers\ClassStudentController::class, 'getClassStudents']);
 
     Route::post('create_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'createSubjectStudents']);
     Route::get('get_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'getSubjectStudents']);
     Route::delete('remove_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'removeSubjectStudents']);
+
+    Route::post('create_laboratory_subjects/{laboratory}', [App\Http\Controllers\LaboratoryController::class, 'createLaboratorySubjects']);
 });
 
 Route::group([

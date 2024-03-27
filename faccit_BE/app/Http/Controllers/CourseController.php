@@ -29,17 +29,16 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        $existingCourse = Course::where('course_code', $request->course_code)->first();
+        $existingCourse = Course::where('course_name', $request->course_name)->first();
 
         if ($existingCourse) {
-            $courseCode = $existingCourse->course_code;
+            $courseName = $existingCourse->course_name;
             return response()->json([
-              'message' => "Error! {$courseCode} Already Exists!",
+              'message' => "Error! {$courseName} Already Exists!",
             ], 409);
           }
         else{
             $courses = new Course;
-            $courses->course_code = $request->course_code;
             $courses->course_name = $request->course_name;
             $courses->course_description = $request->course_description;
             $courses->course_college = $request->course_college;
@@ -72,45 +71,42 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $course_code)
+    public function update(Request $request, string $course_name)
     {
-        $updateCourse = Course::where('course_code', $course_code)->first();
-
-        $updateCourse->course_name = $request->course_name;
+        $updateCourse = Course::where('course_name', $course_name)->first();
         $updateCourse->course_description = $request->course_description;
         $updateCourse->course_college = $request->course_college;
-
         $updateCourse->save();
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Updated ".$course_code
+            "message" => "Successfully Updated ".$course_name
         ];
         return response()->json($message);
     }
 
-    public function deactivateCourse(Request $request, string $course_code)
+    public function deactivateCourse(Request $request, string $course_name)
     {
-        $deactivateCourse = Course::where('course_code', $course_code)->first();
+        $deactivateCourse = Course::where('course_name', $course_name)->first();
         $deactivateCourse->course_status = $request->course_status;
         $deactivateCourse->save();
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Disabled ".$course_code
+            "message" => "Successfully Disabled ".$course_name
         ];
         return response()->json($message);
     }
 
-    public function activateCourse(Request $request, string $course_code)
+    public function activateCourse(Request $request, string $course_name)
     {
-        $activateCourse = Course::where('course_code', $course_code)->first();
+        $activateCourse = Course::where('course_name', $course_name)->first();
         $activateCourse->course_status = $request->course_status;
         $activateCourse->save();
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Reactivated ".$course_code
+            "message" => "Successfully Reactivated ".$course_name
         ];
         return response()->json($message);
     }
