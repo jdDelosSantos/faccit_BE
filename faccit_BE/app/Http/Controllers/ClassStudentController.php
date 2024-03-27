@@ -49,7 +49,7 @@ class ClassStudentController extends Controller
             $student->std_section = $studentData['std_section']; // Use array access []
             $student->save();
         } else if ($existingStudent){
-            $errorMessage = "Error! Student with ID {$studentData['faith_id']} already enrolled in subject {$subject_code}";
+            $errorMessage = "Error! Student with ID {$studentData['faith_id']} already enrolled in subject {$class_code}";
             $errors[] = $errorMessage;
         }
     }
@@ -82,7 +82,7 @@ class ClassStudentController extends Controller
     $deletedCount = ClassStudents::whereIn('id', $studentIds)->delete();
 
     return response()->json([
-        'message' => 'Students deleted successfully',
+        'message' => 'Student records deleted successfully',
         'deleted_count' => $deletedCount,
     ]);
 }
