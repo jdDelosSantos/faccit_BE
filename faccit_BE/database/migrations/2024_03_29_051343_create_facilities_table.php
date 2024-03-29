@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('laboratories', function (Blueprint $table) {
+        Schema::create('facilities', function (Blueprint $table) {
             $table->id();
             $table->string("laboratory");
-            $table->string("subject_code");
-            $table->string("subject_name");
-            $table->string("subject_day");
+            $table->string("class_code");
+            $table->string("class_name");
+            $table->string("class_day");
             $table->string("start_time");
             $table->string("end_time");
             $table->timestamps();
 
-            $table->foreign('subject_code')
-            ->references('subject_code')
-            ->on('subjects')
+            $table->foreign('class_code')
+            ->references('class_code')
+            ->on('classes')
             ->onDelete('cascade')
             ->onUpdate('cascade');
         });
@@ -34,6 +34,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('laboratories');
+        Schema::dropIfExists('facilities');
     }
 };
+
+
+
+

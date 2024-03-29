@@ -16,7 +16,15 @@ class ClassScheduleController extends Controller
             $query->select('class_name','class_code');
         }])->get();
 
-    // Return the JSON response with only class_name
+    return response()->json($classSchedules);
+    }
+
+    public function getClassSchedules()
+    {
+        $classSchedules = ClassSchedule::with(['class' => function ($query) {
+            $query->select('class_name','class_code', 'prof_id');
+        }])->get();
+
     return response()->json($classSchedules);
     }
 

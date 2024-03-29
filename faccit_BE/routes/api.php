@@ -79,6 +79,7 @@ Route::group([
     Route::put('class_enable/{class_code}', [App\Http\Controllers\ClassController::class, 'enableClass']);
 
     Route::get('class_schedule', [App\Http\Controllers\ClassScheduleController::class, 'index']);
+    Route::get('class_schedule_prof', [App\Http\Controllers\ClassScheduleController::class, 'getClassSchedules']);
     Route::post('class_schedule', [App\Http\Controllers\ClassScheduleController::class, 'store']);
     Route::put('update_class_schedule/{id}', [App\Http\Controllers\ClassScheduleController::class, 'update']);
     Route::delete('delete_class_schedule/{id}', [App\Http\Controllers\ClassScheduleController::class, 'destroy']);
@@ -92,7 +93,8 @@ Route::group([
     Route::get('get_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'getSubjectStudents']);
     Route::delete('remove_subject_students/{subject_code}', [App\Http\Controllers\SubjectStudentController::class, 'removeSubjectStudents']);
 
-    Route::post('create_laboratory_subjects/{laboratory}', [App\Http\Controllers\LaboratoryController::class, 'createLaboratorySubjects']);
+    Route::get('laboratory_class_schedules/{laboratory}', [App\Http\Controllers\FacilityController::class, 'index']);
+    Route::post('create_laboratory_classes/{laboratory}', [App\Http\Controllers\FacilityController::class, 'store']);
 });
 
 Route::group([
