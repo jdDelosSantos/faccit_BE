@@ -95,6 +95,7 @@ Route::group([
 
     Route::get('laboratory_class_schedules/{laboratory}', [App\Http\Controllers\FacilityController::class, 'index']);
     Route::post('create_laboratory_classes/{laboratory}', [App\Http\Controllers\FacilityController::class, 'store']);
+    Route::delete('delete_laboratory_classes/{id}', [App\Http\Controllers\FacilityController::class, 'deleteFacilitySchedule']);
 });
 
 Route::group([

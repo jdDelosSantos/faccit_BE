@@ -52,7 +52,8 @@ class FacilityController extends Controller
             $facility->laboratory = $laboratory; // Set the laboratory value
 
             // Check for conflicting class schedules
-            $conflictingClass = Facility::where('class_day', $data['class_day'])
+            $conflictingClass = Facility::where('laboratory', $laboratory)
+                ->where('class_day', $data['class_day'])
                 ->where(function ($query) use ($data) {
                     $query->whereBetween('start_time', [$data['start_time'], $data['end_time']])
                         ->orWhereBetween('end_time', [$data['start_time'], $data['end_time']]);
@@ -84,6 +85,17 @@ class FacilityController extends Controller
             'message' => 'Selected class schedules saved successfully',
             'facilities' => $facilities
         ], 200);
+    }
+
+    public function deleteFacilitySchedule(int $id)
+    {
+        $existingFacilitySchedule = Facility::findOrFail($id); // Find the record by ID
+        $existingFacilitySchedule->delete(); // Delete the record
+
+        // Optional: return a success message or redirect to another page
+        return response()->json([
+          "message" => "Class schedule unloaded  successfully!"
+        ]);
     }
 
     /**
