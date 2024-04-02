@@ -42,11 +42,7 @@ class ClassStudentController extends Controller
                 $student = new ClassStudents();
             $student->class_code = $class_code; // Use $subject_code directly
             $student->faith_id = $studentData['faith_id']; // Use array access []
-            $student->std_lname = $studentData['std_lname']; // Use array access []
-            $student->std_fname = $studentData['std_fname']; // Use array access []
-            $student->std_course = $studentData['std_course']; // Use array access []
-            $student->std_level = $studentData['std_level']; // Use array access []
-            $student->std_section = $studentData['std_section']; // Use array access []
+
             $student->save();
         } else if ($existingStudent){
             $errorMessage = "Error! Student with ID {$studentData['faith_id']} already enrolled in subject {$class_code}";
@@ -64,10 +60,14 @@ class ClassStudentController extends Controller
 
 
 
-    public function getClassStudents(string $class_code){
-        $classStudents = ClassStudents::where('class_code', $class_code)->get();
-        return response()->json($classStudents);
-    }
+    public function getClassStudents(string $class_code)
+{
+    $classStudents = ClassStudents::where('class_code', $class_code)
+        ->with('student:faith_id,std_lname,std_fname,std_course,std_level,std_section')
+        ->get();
+
+    return response()->json($classStudents);
+}
 
 
     public function removeClassStudents(Request $request, $class_code)

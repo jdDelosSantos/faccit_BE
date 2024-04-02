@@ -15,10 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string("course_name")->unique();
             $table->string("course_description");
-            $table->string("course_college");
-            $table->string("course_status");
+            $table->string("college_name");
+            $table->string("course_status")->default('Active');
             $table->timestamps();
 
+            $table->foreign('college_name')
+            ->references('college_name')
+            ->on('colleges')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
         });
     }
 

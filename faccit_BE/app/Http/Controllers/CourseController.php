@@ -41,7 +41,7 @@ class CourseController extends Controller
             $courses = new Course;
             $courses->course_name = $request->course_name;
             $courses->course_description = $request->course_description;
-            $courses->course_college = $request->course_college;
+            $courses->college_name = $request->college_name;
             $courses->save();
 
             $message=(object)[
@@ -71,16 +71,41 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $course_name)
+    public function update(Request $request, int $id)
     {
-        $updateCourse = Course::where('course_name', $course_name)->first();
+
+        $newCourseName = $request->course_name;
+        $existingCourse = Course::where('course_name', $newCourseName)
+            ->where('id', '!=', $id)
+            ->first();
+
+            if ($existingCourse) {
+                // Course name already exists
+                $message = (object) [
+                    "status" => "0",
+                    "message" => "Course Name ".$newCourseName." already exists!"
+                ];
+                return response()->json($message, 422); // Unprocessable Entity
+            }
+
+
+        $updateCourse = Course::where('id', $id)->first();
+        if (!$updateCourse) {
+            // Course with ID not found
+            $message = (object) [
+                "status" => "0",
+                "message" => "Course not found!"
+            ];
+            return response()->json($message, 404); // Not Found
+        }
+        $updateCourse->course_name = $request->course_name;
         $updateCourse->course_description = $request->course_description;
-        $updateCourse->course_college = $request->course_college;
+        $updateCourse->college_name = $request->college_name;
         $updateCourse->save();
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Updated ".$course_name
+            "message" => "Successfully Updated ".$newCourseName
         ];
         return response()->json($message);
     }

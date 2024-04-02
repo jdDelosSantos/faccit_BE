@@ -61,20 +61,20 @@ Route::group([
 
     Route::get('colleges', [App\Http\Controllers\CollegeController::class, 'index']);
     Route::post('colleges', [App\Http\Controllers\CollegeController::class, 'store']);
-    Route::put('update_college/{college_name}', [App\Http\Controllers\CollegeController::class, 'update']);
+    Route::put('update_college/{id}', [App\Http\Controllers\CollegeController::class, 'update']);
     Route::put('college_deactivate/{college_name}', [App\Http\Controllers\CollegeController::class, 'deactivateCollege']);
     Route::put('college_activate/{college_name}', [App\Http\Controllers\CollegeController::class, 'activateCollege']);
 
     Route::get('courses', [App\Http\Controllers\CourseController::class, 'index']);
     Route::post('courses', [App\Http\Controllers\CourseController::class, 'store']);
-    Route::put('update_course/{course_name}', [App\Http\Controllers\CourseController::class, 'update']);
+    Route::put('update_course/{id}', [App\Http\Controllers\CourseController::class, 'update']);
     Route::put('course_deactivate/{course_name}', [App\Http\Controllers\CourseController::class, 'deactivateCourse']);
     Route::put('course_activate/{course_name}', [App\Http\Controllers\CourseController::class, 'activateCourse']);
 
     Route::get('classes', [App\Http\Controllers\ClassController::class, 'index']);
     Route::post('classes', [App\Http\Controllers\ClassController::class, 'store']);
     Route::get('profClasses/{prof_id}', [App\Http\Controllers\ClassController::class, 'getClassesForProfessor']);
-    Route::put('update_classes/{class_code}', [App\Http\Controllers\ClassController::class, 'update']);
+    Route::put('update_classes/{id}', [App\Http\Controllers\ClassController::class, 'update']);
     Route::put('class_disable/{class_code}', [App\Http\Controllers\ClassController::class, 'disableClass']);
     Route::put('class_enable/{class_code}', [App\Http\Controllers\ClassController::class, 'enableClass']);
 

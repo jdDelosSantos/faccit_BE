@@ -73,12 +73,33 @@ class ClassController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $class_code)
+    public function update(Request $request, int $id)
     {
-        $updateClass = Classes::where('class_code', $class_code)->first();
+        $newClassCode = $request->class_code;
 
-        if(!$updateClass){
-            return response()->json(['error' => 'Missing Subject Code!'], 404);
+        $existingClass = Classes::where('class_code', $newClassCode)
+            ->where('id', '!=', $id)
+            ->first();
+
+            if ($existingClass) {
+                // Course name already exists
+                $message = (object) [
+                    "status" => "0",
+                    "message" => "Class Code: ".$newClassCode." already exists!"
+                ];
+                return response()->json($message, 422); // Unprocessable Entity
+            }
+
+
+        $updateClass = Classes::where('id', $id)->first();
+
+        if (!$updateClass) {
+            // Course with ID not found
+            $message = (object) [
+                "status" => "0",
+                "message" => "Class code not found!"
+            ];
+            return response()->json($message, 404); // Not Found
         }
         $updateClass->class_code = $request->class_code;
         $updateClass->class_name = $request->class_name;
@@ -89,7 +110,7 @@ class ClassController extends Controller
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Updated ".$class_code
+            "message" => "Successfully Updated Class code to ".$newClassCode
         ];
         return response()->json($message);
     }
@@ -129,9 +150,11 @@ class ClassController extends Controller
     }
 
     public function getClassesForProfessor($profId)
-    {
-        $classes = Classes::where('prof_id', $profId)->get();
+{
+    $classes = Classes::where('prof_id', $profId)
+        ->withCount('classStudents')
+        ->get();
 
-        return response()->json($classes);
-    }
+    return response()->json($classes);
+}
 }

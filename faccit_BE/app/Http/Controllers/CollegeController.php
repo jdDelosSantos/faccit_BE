@@ -12,7 +12,7 @@ class CollegeController extends Controller
      */
     public function index()
     {
-        $colleges = College::select('college_name', 'college_description','college_status')->get();
+        $colleges = College::select('id','college_name', 'college_description','college_status')->get();
 
 
         return response()->json($colleges);
@@ -73,17 +73,42 @@ class CollegeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $college_name)
+    public function update(Request $request, int $id)
     {
-        $updateCollege = College::where('college_name', $college_name)->first();
+        $newCollegeName = $request->college_name;
 
+        $existingCollege = College::where('college_name', $newCollegeName)
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($existingCollege) {
+            // College name already exists
+            $message = (object) [
+                "status" => "0",
+                "message" => "College Name ".$newCollegeName." already exists!"
+            ];
+            return response()->json($message, 422); // Unprocessable Entity
+        }
+
+        $updateCollege = College::where('id', $id)->first();
+
+        if (!$updateCollege) {
+            // College with ID not found
+            $message = (object) [
+                "status" => "0",
+                "message" => "College not found!"
+            ];
+            return response()->json($message, 404); // Not Found
+        }
+
+        $updateCollege->college_name = $newCollegeName;
         $updateCollege->college_description = $request->college_description;
 
         $updateCollege->save();
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Updated ".$college_name
+            "message" => "Successfully Updated " . $updateCollege->college_name
         ];
         return response()->json($message);
     }

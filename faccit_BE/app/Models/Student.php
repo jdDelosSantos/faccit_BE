@@ -9,6 +9,7 @@ use App\Models\StudentImage;
 class Student extends Model
 {
     use HasFactory;
+
     public function studentImages()
     {
         return $this->hasMany(StudentImage::class, 'faith_id', 'faith_id');
