@@ -129,7 +129,7 @@ class UserController extends Controller
 
         $message = (object) [
             "status" => "1",
-            "message" => "Successfully Reactivated ".$prof_id
+            "message" => "Successfully Enabled ".$prof_id
         ];
         return response()->json($message);
     }

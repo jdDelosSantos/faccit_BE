@@ -94,7 +94,7 @@ class FacilityController extends Controller
 
         // Optional: return a success message or redirect to another page
         return response()->json([
-          "message" => "Class schedule unloaded  successfully!"
+          "message" => "Class schedule removed from lab successfully!"
         ]);
     }
 
