@@ -83,7 +83,7 @@ Route::group([
     Route::post('class_schedule', [App\Http\Controllers\ClassScheduleController::class, 'store']);
     Route::put('update_class_schedule/{id}', [App\Http\Controllers\ClassScheduleController::class, 'update']);
     Route::delete('delete_class_schedule/{id}', [App\Http\Controllers\ClassScheduleController::class, 'destroy']);
-
+    Route::get('get_schedules_students', [App\Http\Controllers\ClassScheduleController::class, 'getJoinedClassSchedulesWithStudents']);
 
     Route::post('create_class_students/{class_code}', [App\Http\Controllers\ClassStudentController::class, 'createClassStudents']);
     Route::delete('remove_class_students/{class_code}', [App\Http\Controllers\ClassStudentController::class, 'removeClassStudents']);
@@ -96,6 +96,8 @@ Route::group([
     Route::get('laboratory_class_schedules/{laboratory}', [App\Http\Controllers\FacilityController::class, 'index']);
     Route::post('create_laboratory_classes/{laboratory}', [App\Http\Controllers\FacilityController::class, 'store']);
     Route::delete('delete_laboratory_classes/{id}', [App\Http\Controllers\FacilityController::class, 'deleteFacilitySchedule']);
+
+
 });
 
 Route::group([
@@ -105,6 +107,8 @@ Route::group([
     Route::post('login', [AuthController::class, 'login']);
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'getImagesForNode']);
     Route::post('superadmin', [App\Http\Controllers\UserController::class, 'storeNewSuperAdmin']);
+
+    Route::post('attendance', [App\Http\Controllers\AttendanceController::class, 'storeAttendance']);
 });
 
 

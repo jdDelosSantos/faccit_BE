@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ClassSchedule;
+use Illuminate\Support\Facades\DB;
 
 class ClassScheduleController extends Controller
 {
@@ -27,6 +28,31 @@ class ClassScheduleController extends Controller
 
     return response()->json($classSchedules);
     }
+
+    public function getJoinedClassSchedulesWithStudents()
+    {
+        $classSchedules = ClassSchedule::whereExists(function ($query) {
+            $query->selectRaw(1)
+                ->from('class_students')
+                ->whereColumn('class_students.class_code', 'class_schedules.class_code');
+        })->with(['class' => function ($query) {
+            $query->select('class_name','class_code', 'prof_id');
+        }])->get();
+
+
+        return response()->json($classSchedules);
+    }
+
+    // public function getJoinedClassSchedulesWithStudents()
+    // {
+    //     $classSchedules = ClassSchedule::join('class_students', 'class_schedules.class_code', '=', 'class_students.class_code')
+    //         ->select('class_schedules.*')
+    //         ->with(['class' => function ($query) {
+    //             $query->select('class_name','class_code', 'prof_id');
+    //         }])->get();
+
+    //     return response()->json($classSchedules);
+    // }
 
     /**
      * Show the form for creating a new resource.
