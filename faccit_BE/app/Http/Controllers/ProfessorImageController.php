@@ -29,7 +29,7 @@ class ProfessorImageController extends Controller
     public function store(Request $request)
     {
         $professorImage = new ProfessorImage;
-        $professorImage->prof_id = $request-> prof_id;
+        $professorImage->faith_id = $request-> faith_id;
         $professorImage->std_folder_url = $request->std_folder_url;
         $professorImage->std_folder_img_url = $request->std_folder_img_url;
         $professorImage->save();
@@ -62,10 +62,10 @@ class ProfessorImageController extends Controller
      */
     public function update(Request $request, string $prof_id)
     {
-        $updateProfessorImage = ProfessorImage::where('prof_id', $prof_id)->where('std_folder_img_url', $request->std_folder_img_url)->first();
+        $updateProfessorImage = ProfessorImage::where('faith_id', $prof_id)->where('std_folder_img_url', $request->std_folder_img_url)->first();
         if(!$updateProfessorImage){
         $professorImage = new ProfessorImage;
-        $professorImage->prof_id = $request-> prof_id;
+        $professorImage->faith_id = $request-> faith_id;
         $professorImage->std_folder_url = $request->std_folder_url;
         $professorImage->std_folder_img_url = $request->std_folder_img_url;
         $professorImage->save();
@@ -100,7 +100,7 @@ class ProfessorImageController extends Controller
     {
         try {
         // Retrieve only 'prof_id' and 'data_url' columns from the database
-        $professorImages = ProfessorImage::where('prof_id',  $request->prof_id)->select('std_folder_url', 'std_folder_img_url')->get();
+        $professorImages = ProfessorImage::where('faith_id',  $request->faith_id)->select('std_folder_url', 'std_folder_img_url')->get();
 
         // Return the specific data to the frontend
         return response()->json($professorImages);

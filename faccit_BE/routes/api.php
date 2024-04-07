@@ -108,6 +108,8 @@ Route::group([
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'getImagesForNode']);
     Route::post('superadmin', [App\Http\Controllers\UserController::class, 'storeNewSuperAdmin']);
 
+    Route::get('all_images', [App\Http\Controllers\ImageController::class, 'getAllImages']);
+
     Route::post('attendance', [App\Http\Controllers\AttendanceController::class, 'storeAttendance']);
 });
 

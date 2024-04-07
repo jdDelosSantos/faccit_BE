@@ -12,6 +12,6 @@ class ProfessorImage extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'prof_id', 'prof_id');
+        return $this->belongsTo(User::class, 'prof_id', 'faith_id');
     }
 }

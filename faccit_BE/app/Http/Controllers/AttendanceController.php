@@ -188,7 +188,7 @@ class AttendanceController extends Controller
     }
 
 
-    private function storeProfessorAttendance(Request $request, $day, $time, $laboratory)
+    public function storeProfessorAttendance(Request $request, $day, $time, $laboratory)
 {
     $professorId = $request->input('id');
 
@@ -233,7 +233,7 @@ class AttendanceController extends Controller
 }
 
 
-private function storeStudentAttendance(Request $request, $day, $time, $laboratory)
+public function storeStudentAttendance(Request $request, $day, $time, $laboratory)
 {
     $studentId = $request->input('id');
 
