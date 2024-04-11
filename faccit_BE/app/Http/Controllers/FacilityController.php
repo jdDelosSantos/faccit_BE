@@ -59,16 +59,20 @@ class FacilityController extends Controller
         $conflictingClass = Facility::where('laboratory', $laboratory)
             ->where('class_day', $data['class_day'])
             ->where(function ($query) use ($startTime, $endTime) {
-                $query->where(function ($q) use ($startTime, $endTime) {
-                    $q->where('start_time', '<=', $startTime)
-                        ->where('end_time', '>=', $startTime);
+                $query->where(function ($query) use ($startTime, $endTime) {
+                    $query->whereRaw('(start_time BETWEEN ? AND ?)', [
+                        $startTime->format('H:i:s'),
+                        $endTime->subSecond()->format('H:i:s'),
+                    ])
+                    ->orWhereRaw('(end_time BETWEEN ? AND ?)', [
+                        $startTime->addSecond()->format('H:i:s'),
+                        $endTime->format('H:i:s'),
+                    ]);
                 })
-                ->orWhere(function ($q) use ($startTime, $endTime) {
-                    $q->where('start_time', '<=', $endTime)
-                        ->where('end_time', '>=', $endTime);
-                })
-                ->orWhereBetween('start_time', [$startTime, $endTime])
-                ->orWhereBetween('end_time', [$startTime, $endTime]);
+                ->orWhere(function ($query) use ($startTime, $endTime) {
+                    $query->where('start_time', '<=', $startTime->format('H:i:s'))
+                        ->where('end_time', '>=', $endTime->format('H:i:s'));
+                });
             })
             ->exists();
 
@@ -143,4 +147,18 @@ class FacilityController extends Controller
     {
         //
     }
+
+    public function getClassSchedForAbsent(Request $request, string $id)
+{
+    $laboratory = $request->input('laboratory');
+
+    $classSchedules = DB::table('facilities')
+        ->join('classes', 'facilities.class_code', '=', 'classes.class_code')
+        ->where('facilities.laboratory', $laboratory)
+        ->where('classes.prof_id', $id)
+        ->select('facilities.id','facilities.class_day', 'facilities.start_time', 'facilities.end_time', 'classes.class_name', 'classes.class_code')
+        ->get();
+
+    return response()->json($classSchedules);
+}
 }

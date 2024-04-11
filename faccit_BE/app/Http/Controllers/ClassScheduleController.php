@@ -20,14 +20,14 @@ class ClassScheduleController extends Controller
     return response()->json($classSchedules);
     }
 
-    public function getClassSchedules()
-    {
-        $classSchedules = ClassSchedule::with(['class' => function ($query) {
-            $query->select('class_name','class_code', 'prof_id');
-        }])->get();
+    // public function getClassSchedules()
+    // {
+    //     $classSchedules = ClassSchedule::with(['class' => function ($query) {
+    //         $query->select('class_name','class_code', 'prof_id');
+    //     }])->get();
 
-    return response()->json($classSchedules);
-    }
+    // return response()->json($classSchedules);
+    // }
 
     public function getJoinedClassSchedulesWithStudents()
     {

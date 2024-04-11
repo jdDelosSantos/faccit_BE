@@ -72,6 +72,8 @@ Route::group([
     Route::put('course_activate/{course_name}', [App\Http\Controllers\CourseController::class, 'activateCourse']);
 
     Route::get('classes', [App\Http\Controllers\ClassController::class, 'index']);
+    // Route::get('get_classes/{id}', [App\Http\Controllers\ClassController::class, 'getClassesForRequestMakeupClass']);
+
     Route::post('classes', [App\Http\Controllers\ClassController::class, 'store']);
     Route::get('profClasses/{prof_id}', [App\Http\Controllers\ClassController::class, 'getClassesForProfessor']);
     Route::put('update_classes/{id}', [App\Http\Controllers\ClassController::class, 'update']);
@@ -97,7 +99,14 @@ Route::group([
     Route::post('create_laboratory_classes/{laboratory}', [App\Http\Controllers\FacilityController::class, 'store']);
     Route::delete('delete_laboratory_classes/{id}', [App\Http\Controllers\FacilityController::class, 'deleteFacilitySchedule']);
 
+    Route::post('get_laboratory_scheds/{id}', [App\Http\Controllers\ClassController::class, 'getClassSchedForAbsent']);
 
+    Route::get('makeup_classes', [App\Http\Controllers\MakeupClassController::class, 'index']);
+    Route::post('request_makeup_class/{id}', [App\Http\Controllers\MakeupClassController::class, 'store']);
+
+    Route::post('approve_makeup_class/{id}', [App\Http\Controllers\MakeupClassController::class, 'approveMakeupClass']);
+
+    Route::post('reject_makeup_class' , [App\Http\Controllers\MakeupClassController::class, 'rejectMakeupClass']);
 });
 
 Route::group([

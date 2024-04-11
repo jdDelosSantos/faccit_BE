@@ -16,6 +16,58 @@ class ClassController extends Controller
         return response()->json($classes);
     }
 
+//     public function getClassesForRequestMakeupClass(Request $request, string $id)
+// {
+//     $laboratory = $request->input('laboratory');
+
+//     $classesWithSchedules = DB::table('classes')
+//     ->join('facilities')
+//         ->withCount('classStudents')
+//         ->has('classStudents', '>', 0)
+//         ->get();
+
+//     return response()->json($classes);
+// }
+
+public function getClassSchedForAbsent(Request $request, string $id)
+{
+    $laboratory = $request->input('laboratory');
+
+    $classes = Classes::with(['facilities' => function ($query) use ($laboratory) {
+        $query->where('laboratory', $laboratory);
+    }])
+    ->where('prof_id', $id)
+    ->has('facilities')
+    ->get();
+
+
+    $classesWithFacilities = $classes->map(function ($class) {
+        $facilities = $class->facilities->map(function ($facility) {
+            return [
+                'id' => $facility->id,
+                'laboratory' => $facility->laboratory,
+                'class_code' => $facility->class_code,
+                'class_day' => $facility->class_day,
+                'start_time' => $facility->start_time,
+                'end_time' => $facility->end_time,
+            ];
+        });
+
+        return [
+            'id' => $class->id,
+            'class_code' => $class->class_code,
+            'class_name' => $class->class_name,
+            'class_description' => $class->class_description,
+            'college_name' => $class->college_name,
+            'prof_id' => $class->prof_id,
+            'class_status' => $class->class_status,
+            'facilities' => $facilities,
+        ];
+    });
+
+    return response()->json($classesWithFacilities);
+}
+
     /**
      * Show the form for creating a new resource.
      */

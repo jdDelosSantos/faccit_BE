@@ -14,4 +14,9 @@ class Facility extends Model
     {
         return $this->belongsTo(Classes::class, 'class_code', 'class_code');
     }
+
+    public function classes()
+    {
+        return $this->belongsTo(Classes::class, 'class_code', 'class_code');
+    }
 }
