@@ -102,11 +102,14 @@ Route::group([
     Route::post('get_laboratory_scheds/{id}', [App\Http\Controllers\ClassController::class, 'getClassSchedForAbsent']);
 
     Route::get('makeup_classes', [App\Http\Controllers\MakeupClassController::class, 'index']);
+    Route::get('makeup_classes_prof/{prof_id}', [App\Http\Controllers\MakeupClassController::class, 'getMakeupClassRequestsforProfessor']);
     Route::post('request_makeup_class/{id}', [App\Http\Controllers\MakeupClassController::class, 'store']);
 
     Route::post('approve_makeup_class/{id}', [App\Http\Controllers\MakeupClassController::class, 'approveMakeupClass']);
 
     Route::post('reject_makeup_class' , [App\Http\Controllers\MakeupClassController::class, 'rejectMakeupClass']);
+
+    Route::post('request_cancel_class/{id}' , [App\Http\Controllers\CancelClassController::class, 'store']);
 });
 
 Route::group([

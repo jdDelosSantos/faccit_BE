@@ -171,14 +171,10 @@ class AttendanceController extends Controller
 
         if ($this->isProfessor($id)) {
             $response = $this->storeProfessorAttendance($request, $day, $time, $laboratory);
-            if ($response instanceof JsonResponse) {
-                return $response;
-            }
+            return $response;
         } elseif ($this->isStudent($id)) {
             $response = $this->storeStudentAttendance($request, $day, $time, $laboratory);
-            if ($response instanceof JsonResponse) {
-                return $response;
-            }
+            return $response;
         }
         else{
             // Return an error response if the ID is neither a professor nor a student
@@ -188,111 +184,131 @@ class AttendanceController extends Controller
     }
 
 
-    public function storeProfessorAttendance(Request $request, $day, $time, $laboratory)
-{
-    $professorId = $request->input('id');
+    public function storeProfessorAttendance(Request $request, $day, $time, $laboratory) {
+        $professorId = $request->input('id');
 
-    // Check if the professor has a class scheduled for the given day, time, and laboratory
-    $classSchedule = DB::table('facilities')
-        ->join('classes', 'facilities.class_code', '=', 'classes.class_code')
-        ->where('classes.prof_id', $professorId)
-        ->where('facilities.class_day', $day)
-        ->where('facilities.start_time', '<=', $time)
-        ->where('facilities.end_time', '>=', $time)
-        ->where('facilities.laboratory', $laboratory)
-        ->first();
+        // Check if the professor has any class scheduled for the given day, time, and laboratory
+        $classSchedules = DB::table('facilities')
+            ->join('classes', 'facilities.class_code', '=', 'classes.class_code')
+            ->where('classes.prof_id', $professorId)
+            ->where('facilities.class_day', $day)
+            ->where('facilities.laboratory', $laboratory)
+            ->get();
 
-    if (!$classSchedule) {
-        return response()->json(['message' => 'No class schedule found for the provided details.']);
+        if ($classSchedules->isEmpty()) {
+            return response()->json(['message' => 'No class schedule found for the provided details.']);
+        }
+
+        $attendanceRecorded = false;
+
+        foreach ($classSchedules as $classSchedule) {
+            if ($time >= $classSchedule->start_time && $time <= $classSchedule->end_time) {
+                $existingAttendance = DB::table('professor_attendances')
+                    ->where('prof_id', $professorId)
+                    ->where('class_code', $classSchedule->class_code)
+                    ->where('date', date('Y-m-d'))
+                    ->whereBetween('time_in', [$classSchedule->start_time, $classSchedule->end_time])
+                    ->exists();
+
+                if (!$existingAttendance) {
+                    $attendanceData = [
+                        'class_code' => $classSchedule->class_code,
+                        'prof_id' => $professorId,
+                        'date' => date('Y-m-d'),
+                        'time_in' => $time,
+                        'status' => 'Present',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+
+                    DB::table('professor_attendances')->insert($attendanceData);
+                    $attendanceRecorded = true;
+
+                    return response()->json([
+                        'prof_id' => $professorId,
+                        'time_in' => $time,
+                        'class_code' => $classSchedule->class_code,
+                        'status' => 'Successful'
+                    ]);
+                }
+            }
+        }
+
+        if ($attendanceRecorded) {
+            return response()->json(['message' => 'Attendance recorded successfully']);
+        } else {
+            return response()->json(['message' => 'Professor attendance already recorded for this class schedule.']);
+        }
     }
-
-    // Check if the professor has already taken attendance for this class schedule
-    $existingAttendance = DB::table('professor_attendances')
-        ->where('prof_id', $professorId)
-        ->where('class_code', $classSchedule->class_code)
-        ->where('date', date('Y-m-d'))
-        ->exists();
-
-    if ($existingAttendance) {
-        return response()->json(['message' => 'Professor attendance already recorded for this class schedule.']);
-    }
-
-    // Store the professor attendance record
-    DB::table('professor_attendances')->insert([
-        'class_code' => $classSchedule->class_code,
-        'prof_id' => $professorId,
-        'date' => date('Y-m-d'),
-        'time_in' => $time,
-        'status' => 'Present',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    // Return an appropriate response
-    return response()->json(['message' => 'Attendance recorded successfully']);
-}
-
 
 public function storeStudentAttendance(Request $request, $day, $time, $laboratory)
 {
     $studentId = $request->input('id');
 
-    // Check if there is a class schedule for the given day, time, and laboratory
-    $classSchedule = DB::table('facilities')
+    // Check if there are any class schedules for the given day, time, and laboratory
+    $classSchedules = DB::table('facilities')
         ->where('class_day', $day)
-        ->where('start_time', '<=', $time)
-        ->where('end_time', '>=', $time)
         ->where('laboratory', $laboratory)
-        ->first();
+        ->get();
 
-    if (!$classSchedule) {
+    if ($classSchedules->isEmpty()) {
         return response()->json(['message' => 'No class schedule found for the provided details.']);
     }
 
-    // Check if the student is enrolled in the class
-    $isStudentEnrolled = DB::table('class_students')
-        ->where('faith_id', $studentId)
-        ->where('class_code', $classSchedule->class_code)
-        ->exists();
+    $attendanceRecorded = false;
 
-    if (!$isStudentEnrolled) {
-        return response()->json(['message' => 'Student is not enrolled in the class.']);
+    foreach ($classSchedules as $classSchedule) {
+        // Check if the student is enrolled in the class
+        $isStudentEnrolled = DB::table('class_students')
+            ->where('faith_id', $studentId)
+            ->where('class_code', $classSchedule->class_code)
+            ->exists();
+
+        if (!$isStudentEnrolled) {
+            continue;
+        }
+
+        // Check if the professor has already taken attendance for this class schedule
+        $professorAttendance = DB::table('professor_attendances')
+            ->where('class_code', $classSchedule->class_code)
+            ->where('date', date('Y-m-d'))
+            ->whereBetween('time_in', [$classSchedule->start_time, $classSchedule->end_time])
+            ->exists();
+
+        if (!$professorAttendance) {
+            continue;
+        }
+
+        // Check if the student has already taken attendance for this class schedule within the time range
+        $existingAttendance = DB::table('attendances')
+            ->where('faith_id', $studentId)
+            ->where('class_code', $classSchedule->class_code)
+            ->where('date', date('Y-m-d'))
+            ->whereBetween('time_in', [$classSchedule->start_time, $classSchedule->end_time])
+            ->exists();
+
+        if (!$existingAttendance) {
+            if ($time >= $classSchedule->start_time && $time <= $classSchedule->end_time) {
+                DB::table('attendances')->insert([
+                    'class_code' => $classSchedule->class_code,
+                    'faith_id' => $studentId,
+                    'date' => date('Y-m-d'),
+                    'time_in' => $time,
+                    'status' => 'Present',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $attendanceRecorded = true;
+            }
+        }
     }
 
-    // Check if the professor has already taken attendance for this class schedule
-    $professorAttendance = DB::table('professor_attendances')
-        ->where('class_code', $classSchedule->class_code)
-        ->where('date', date('Y-m-d'))
-        ->exists();
-
-    if (!$professorAttendance) {
-        return response()->json(['message' => 'Professor attendance not recorded for this class schedule.']);
+    if ($attendanceRecorded) {
+        return response()->json(['message' => 'Attendance recorded successfully']);
+    } else {
+        return response()->json(['message' => 'Student attendance already recorded or student not enrolled in any of the classes.']);
     }
-
-    // Check if the student has already taken attendance
-    $existingAttendance = DB::table('attendances')
-        ->where('faith_id', $studentId)
-        ->where('class_code', $classSchedule->class_code)
-        ->where('date', date('Y-m-d'))
-        ->exists();
-
-    if ($existingAttendance) {
-        return response()->json(['message' => 'Student attendance already recorded for this class schedule.']);
-    }
-
-    // Store the student attendance record
-    DB::table('attendances')->insert([
-        'class_code' => $classSchedule->class_code,
-        'faith_id' => $studentId,
-        'date' => date('Y-m-d'),
-        'time_in' => $time,
-        'status' => 'Present',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    // Return an appropriate response
-    return response()->json(['message' => 'Attendance recorded successfully']);
 }
 
 }

@@ -134,12 +134,18 @@ class ClassScheduleController extends Controller
      */
     public function destroy(int $id)
     {
-        $classSchedule = ClassSchedule::findOrFail($id); // Find the record by ID
-        $classSchedule->delete(); // Delete the record
+        $classSchedule = ClassSchedule::where('id', $id)->first();
+        if (!$classSchedule){
+            return response()->json([
+                'message' => "Error! Class Schedule does not exist!",
+              ], 404);
+        }
+        else if ($classSchedule){
+            $classSchedule->delete();
+            return response()->json([
+              "message" => "Class schedule deleted successfully!"
+            ]);
+        }
 
-        // Optional: return a success message or redirect to another page
-        return response()->json([
-          "message" => "Class schedule deleted successfully!"
-        ]);
     }
 }

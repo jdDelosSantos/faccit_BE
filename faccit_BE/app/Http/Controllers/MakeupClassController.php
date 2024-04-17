@@ -13,6 +13,21 @@ class MakeupClassController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function getMakeupClassRequestsforProfessor(string $prof_id)
+    {
+        $makeupClasses = RequestMakeupClass::where('prof_id', $prof_id)->with(['class' => function ($query) {
+        $query->select('class_name', 'class_code');
+    }])
+    ->with(['professor' => function ($query) {
+        $query->select('prof_id', 'user_firstname', 'user_lastname');
+    }])
+    ->select('*', DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d") as created_date'))
+    ->get();
+
+
+        return response()->json($makeupClasses);
+    }
+
     public function index()
     {
         $makeupClasses = RequestMakeupClass::with(['class' => function ($query) {
@@ -48,32 +63,12 @@ class MakeupClassController extends Controller
         $makeupClass->class_day = $request->class_day;
         $makeupClass->start_time = $request->start_time;
         $makeupClass->end_time = $request->end_time;
-
-        $makeupClass->absent_laboratory = $request->absent_laboratory;
-        $makeupClass->absent_class_code = $request->absent_class_code;
-        $makeupClass->absent_class_day = $request->absent_class_day;
-        $makeupClass->absent_start_time = $request->absent_start_time;
-        $makeupClass->absent_end_time = $request->absent_end_time;
         $makeupClass->save();
 
         return response()->json(['message' => 'Makeup Class requested successfully']);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
