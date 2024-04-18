@@ -95,11 +95,6 @@ class MakeupClassController extends Controller
         'start_time' => 'required|date_format:H:i:s',
         'end_time' => 'required|date_format:H:i:s',
         'laboratory' => 'required',
-        'absent_class_code' => 'required',
-        'absent_class_day' => 'required',
-        'absent_start_time' => 'required|date_format:H:i:s',
-        'absent_end_time' => 'required|date_format:H:i:s',
-        'absent_laboratory' => 'required',
     ]);
 
     // Check if the new class schedule conflicts with an existing one
@@ -126,11 +121,34 @@ class MakeupClassController extends Controller
         })
         ->exists();
 
-    if ($conflictingClass){
-        return response()->json([
-            'message' => "Error! There is a Conflicting Class Schedule!",
-          ], 409);
-    }
+        if ($conflictingClass) {
+            // Get the conflicting class details
+            $conflictingClassDetails = Facility::join('classes', 'facilities.class_code', '=', 'classes.class_code')
+                ->where('facilities.laboratory', $validatedData['laboratory'])
+                ->where('facilities.class_day', $validatedData['class_day'])
+                ->where(function ($query) use ($startTime, $endTime) {
+                    $query->where(function ($query) use ($startTime, $endTime) {
+                        $query->whereRaw('(facilities.start_time BETWEEN ? AND ?)', [
+                            $startTime->format('H:i:s'),
+                            $endTime->subSecond()->format('H:i:s'),
+                        ])
+                        ->orWhereRaw('(facilities.end_time BETWEEN ? AND ?)', [
+                            $startTime->addSecond()->format('H:i:s'),
+                            $endTime->format('H:i:s'),
+                        ]);
+                    })
+                    ->orWhere(function ($query) use ($startTime, $endTime) {
+                        $query->where('facilities.start_time', '<=', $startTime->format('H:i:s'))
+                            ->where('facilities.end_time', '>=', $endTime->format('H:i:s'));
+                    });
+                })
+                ->select('facilities.*', 'classes.class_name')
+                ->first();
+
+                return response()->json([
+                    'message' => "Conflicting Schedule at " . $conflictingClassDetails->class_day . ", " . $conflictingClassDetails->class_name . ": " . $conflictingClassDetails->start_time . " - " . $conflictingClassDetails->end_time
+                ], 409);
+        }
 
     else if (!$conflictingClass) {
         // Create a new record in the facilities table
@@ -141,14 +159,6 @@ class MakeupClassController extends Controller
         $facility->end_time = $validatedData['end_time'];
         $facility->laboratory = $validatedData['laboratory'];
         $facility->save();
-
-        // Delete the record with the absent_* values
-        Facility::where('class_code', $validatedData['absent_class_code'])
-            ->where('class_day', $validatedData['absent_class_day'])
-            ->where('start_time', $validatedData['absent_start_time'])
-            ->where('end_time', $validatedData['absent_end_time'])
-            ->where('laboratory', $validatedData['absent_laboratory'])
-            ->delete();
 
         // Update the makeup_class_status in the request_makeup_classes table
         $requestMakeupClass = RequestMakeupClass::find($id);
@@ -173,7 +183,7 @@ class MakeupClassController extends Controller
         $reject->save();
 
         return response()->json([
-            'message' => 'Makeup class rejected successfully.',
+            'message' => 'Makeup Class Request rejected successfully.',
         ]);
     }
 

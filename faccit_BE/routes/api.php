@@ -104,12 +104,14 @@ Route::group([
     Route::get('makeup_classes', [App\Http\Controllers\MakeupClassController::class, 'index']);
     Route::get('makeup_classes_prof/{prof_id}', [App\Http\Controllers\MakeupClassController::class, 'getMakeupClassRequestsforProfessor']);
     Route::post('request_makeup_class/{id}', [App\Http\Controllers\MakeupClassController::class, 'store']);
-
     Route::post('approve_makeup_class/{id}', [App\Http\Controllers\MakeupClassController::class, 'approveMakeupClass']);
-
     Route::post('reject_makeup_class' , [App\Http\Controllers\MakeupClassController::class, 'rejectMakeupClass']);
 
+    Route::get('cancel_classes', [App\Http\Controllers\CancelClassController::class, 'index']);
     Route::post('request_cancel_class/{id}' , [App\Http\Controllers\CancelClassController::class, 'store']);
+    Route::get('cancel_classes_prof/{prof_id}', [App\Http\Controllers\CancelClassController::class, 'getCancelClassRequestsforProfessor']);
+    Route::post('approve_cancel_class/{id}', [App\Http\Controllers\CancelClassController::class, 'approveCancelClass']);
+    Route::post('reject_cancel_class' , [App\Http\Controllers\CancelClassController::class, 'rejectCancelClass']);
 });
 
 Route::group([
