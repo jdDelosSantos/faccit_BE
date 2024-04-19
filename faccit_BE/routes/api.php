@@ -112,6 +112,9 @@ Route::group([
     Route::get('cancel_classes_prof/{prof_id}', [App\Http\Controllers\CancelClassController::class, 'getCancelClassRequestsforProfessor']);
     Route::post('approve_cancel_class/{id}', [App\Http\Controllers\CancelClassController::class, 'approveCancelClass']);
     Route::post('reject_cancel_class' , [App\Http\Controllers\CancelClassController::class, 'rejectCancelClass']);
+
+    Route::post('student_attendances/{classCode}' , [App\Http\Controllers\AttendanceController::class, 'getStudentAttendances']);
+    Route::post('add_manual_attendance' , [App\Http\Controllers\AttendanceController::class, 'addManualAttendance']);
 });
 
 Route::group([

@@ -10,148 +10,81 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
-    public function store(Request $request)
-    {
-        $attendance = $request->all();
+    // public function store(Request $request)
+    // {
+    //     $attendance = $request->all();
 
-        return response()->json($attendance);
+    //     return response()->json($attendance);
+    // }
+
+
+    //FUNCTION FOR GETTING PROFESSOR BASED ON THE CLASS CODE
+    // public function getProfessorAttendance()
+    // {
+    //     $professorAttendances = DB::table('professor_attendances')
+
+    // }
+
+
+    public function addManualAttendance(Request $request)
+    {
+        $manualAttendance = new Attendance;
+        $manualAttendance->class_code = $request->class_code;
+        $manualAttendance->faith_id = $request->faith_id;
+        $manualAttendance->date = $request->date;
+        $manualAttendance->time_in = $request->time_in;
+        $manualAttendance->status = $request->status;
+        $manualAttendance->save();
+
+        return response()->json(['message' => ''.$request->faith_id.' set to Present successfully']);
     }
 
-    // public function storeAttendance(Request $request)
-    // {
-    // // Validate the request data
-    // $validatedData = $request->validate([
-    //     'faith_id' => 'required|string',
-    //     'day' => 'required|string',
-    //     'time' => 'required|date_format:H:i:s',
-    //     'laboratory' => 'required|string',
-    // ]);
+    //FUNCTION FOR GETTING STUDENTS BASED ON THE CLASS CODE
+    public function getStudentAttendances(string $classCode, Request $request)
+{
+    $date = $request->date;
+    $startTime = $request->start_time;
+    $endTime = $request->end_time;
 
-    // // Check if the faith_id exists in the class_students table
-    // $classStudent = ClassStudents::where('faith_id', $validatedData['faith_id'])->first();
-    // if (!$classStudent) {
-    //     return response()->json(['message' => 'Invalid faith_id']);
-    // }
+    // Retrieve the list of students enrolled in the class
+    $students = DB::table('class_students')
+        ->where('class_code', $classCode)
+        ->pluck('faith_id');
 
-    // // Check if the day and time match a facility record for the specified laboratory
-    // $facility = Facility::where('laboratory', $validatedData['laboratory'])
-    //     ->where('class_day', $validatedData['day'])
-    //     ->whereTime('start_time', '<=', $validatedData['time'])
-    //     ->whereTime('end_time', '>=', $validatedData['time'])
-    //     ->first();
+    // Join the class_students table with attendances, classes, and students tables
+    $studentAttendances = DB::table('class_students')
+        ->join('students', 'class_students.faith_id', '=', 'students.faith_id')
+        ->leftJoin('attendances', function ($join) use ($classCode, $date, $startTime, $endTime) {
+            $join->on('class_students.faith_id', '=', 'attendances.faith_id')
+                ->where('attendances.class_code', $classCode)
+                ->whereDate('attendances.date', $date)
+                ->whereTime('attendances.time_in', '>=', $startTime)
+                ->whereTime('attendances.time_in', '<=', $endTime);
+        })
+        ->leftJoin('classes', 'class_students.class_code', '=', 'classes.class_code')
+        ->whereIn('class_students.faith_id', $students)
+        ->select(
+            'students.faith_id',
+            'students.std_fname',
+            'students.std_lname',
+            'students.std_course',
+            'students.std_level',
+            'students.std_section',
+            DB::raw("COALESCE(attendances.date, '{$date}') as date"),
+            'attendances.time_in',
+            DB::raw('COALESCE(attendances.status, "Absent") as status'),
+            'classes.class_name',
+            'classes.class_code'
+        )
+        ->get();
 
-    // if (!$facility) {
-    //     return response()->json(['message' => 'Invalid day, time, or laboratory']);
-    // }
-
-    // // Check if the faith_id is assigned to the class_code in the facility record
-    // $classStudentForFacility = ClassStudents::where('class_code', $facility->class_code)
-    //     ->where('faith_id', $validatedData['faith_id'])
-    //     ->first();
-
-    // if (!$classStudentForFacility) {
-    //     return response()->json(['message' => 'Student not enrolled in this laboratory session']);
-    // }
-
-    // // Check if an attendance record already exists for the student, class, and date
-    // $existingAttendance = Attendance::where('class_code', $facility->class_code)
-    //     ->where('faith_id', $validatedData['faith_id'])
-    //     ->whereDate('date', now()->toDateString())
-    //     ->first();
-
-    // if ($existingAttendance) {
-    //     return response()->json(['message' => 'Attendance already recorded for this session']);
-    // }
-
-    // // Store the attendance record
-    // $attendance = new Attendance();
-    // $attendance->class_code = $facility->class_code;
-    // $attendance->faith_id = $validatedData['faith_id'];
-    // $attendance->date = now()->toDateString();
-    // $attendance->time_in = $validatedData['time'];
-    // $attendance->status = 'present';
-    // $attendance->save();
-
-    // return response()->json(['message' => 'Attendance recorded successfully']);
-    // }
+    // Return the retrieved attendance records, class names, and student information as a JSON response
+    return response()->json($studentAttendances);
+}
 
 
 
-//     public function storeAttendance(Request $request)
-// {
-//     // Validate the request data
-//     $validatedData = $request->validate([
-//         'faith_id' => 'required|string',
-//         'day' => 'required|string',
-//         'time' => 'required|date_format:H:i:s',
-//         'laboratory' => 'required|string',
-//     ]);
-
-//     // Check if the faith_id exists in the class_students table
-//     $classStudent = ClassStudents::where('faith_id', $validatedData['faith_id'])->first();
-//     if (!$classStudent) {
-//         return response()->json(['error' => 'Invalid faith_id'], 400);
-//     }
-
-//     // Check if the day and time match a facility record for the specified laboratory
-//     $facility = Facility::where('laboratory', $validatedData['laboratory'])
-//         ->where('class_day', $validatedData['day'])
-//         ->whereTime('start_time', '<=', $validatedData['time'])
-//         ->whereTime('end_time', '>=', $validatedData['time'])
-//         ->first();
-
-//     if (!$facility) {
-//         return response()->json(['error' => 'Invalid day, time, or laboratory'], 400);
-//     }
-
-//     // Check if the faith_id is assigned to the class_code in the facility record
-//     $classStudentForFacility = ClassStudents::where('class_code', $facility->class_code)
-//         ->where('faith_id', $validatedData['faith_id'])
-//         ->first();
-
-//     if (!$classStudentForFacility) {
-//         return response()->json(['error' => 'Student not enrolled in this laboratory session'], 400);
-//     }
-
-//     // Get the professor's faith_id from the classes table
-//     $professorFaithId = DB::table('classes')
-//         ->where('class_code', $facility->class_code)
-//         ->value('prof_id');
-
-//     // Check if the professor has already recorded attendance for this session
-//     $professorAttendance = Attendance::where('class_code', $facility->class_code)
-//         ->where('faith_id', $professorFaithId)
-//         ->whereDate('date', now()->toDateString())
-//         ->first();
-
-//     if (!$professorAttendance && $validatedData['faith_id'] !== $professorFaithId) {
-//         return response()->json(['error' => 'Professor attendance not recorded yet'], 400);
-//     }
-
-//     // Check if an attendance record already exists for the student, class, and date
-//     $existingAttendance = Attendance::where('class_code', $facility->class_code)
-//         ->where('faith_id', $validatedData['faith_id'])
-//         ->whereDate('date', now()->toDateString())
-//         ->first();
-
-//     if ($existingAttendance) {
-//         return response()->json(['error' => 'Attendance already recorded for this session'], 400);
-//     }
-
-//     // Store the attendance record
-//     $attendance = new Attendance();
-//     $attendance->class_code = $facility->class_code;
-//     $attendance->faith_id = $validatedData['faith_id'];
-//     $attendance->date = now()->toDateString();
-//     $attendance->time_in = $validatedData['time'];
-//     $attendance->status = 'present';
-//     $attendance->save();
-
-//     return response()->json(['message' => 'Attendance recorded successfully']);
-// }
-
-
-
+    //PRIVATE FUNCTION FOR DETERMINING THE ID
     private function isStudent($id)
     {
         return DB::table('class_students')->where('faith_id', $id)->exists();
@@ -183,7 +116,7 @@ class AttendanceController extends Controller
 
     }
 
-
+    //PUBLIC FUNCTION FOR PROFESSOR ATTENDANCE
     public function storeProfessorAttendance(Request $request, $day, $time, $laboratory) {
         $professorId = $request->input('id');
 
@@ -241,8 +174,10 @@ class AttendanceController extends Controller
         }
     }
 
-public function storeStudentAttendance(Request $request, $day, $time, $laboratory)
-{
+
+    //PUBLIC FUNCTION FOR STUDENT ATTENDANCE
+    public function storeStudentAttendance(Request $request, $day, $time, $laboratory)
+    {
     $studentId = $request->input('id');
 
     // Check if there are any class schedules for the given day, time, and laboratory
@@ -306,9 +241,13 @@ public function storeStudentAttendance(Request $request, $day, $time, $laborator
 
     if ($attendanceRecorded) {
         return response()->json(['message' => 'Attendance recorded successfully']);
-    } else {
+        }
+        else {
         return response()->json(['message' => 'Student attendance already recorded or student not enrolled in any of the classes.']);
+        }
     }
-}
+
+
+
 
 }
