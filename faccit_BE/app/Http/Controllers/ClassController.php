@@ -209,4 +209,37 @@ public function getClassSchedForAbsent(Request $request, string $id)
 
     return response()->json($classes);
 }
+
+    public function getCountClassesForProfessor(string $prof_id)
+    {
+    $classCount = Classes::where('prof_id', $prof_id)->count();
+
+    return response()->json([
+        'class_count' => $classCount
+    ]);
+    }
+
+    public function getCountClassesForProfessorInPL(string $prof_id, $laboratory = "lab_programming")
+    {
+    $classCount = Classes::join('facilities', 'classes.class_code', '=', 'facilities.class_code')
+                        ->where('classes.prof_id', $prof_id)
+                        ->where('facilities.laboratory', $laboratory)
+                        ->count();
+
+    return response()->json([
+        'class_count' => $classCount
+    ]);
+    }
+
+    public function getCountClassesForProfessorInML(string $prof_id, $laboratory = "lab_multimedia")
+    {
+    $classCount = Classes::join('facilities', 'classes.class_code', '=', 'facilities.class_code')
+                        ->where('classes.prof_id', $prof_id)
+                        ->where('facilities.laboratory', $laboratory)
+                        ->count();
+
+    return response()->json([
+        'class_count' => $classCount
+    ]);
+    }
 }
