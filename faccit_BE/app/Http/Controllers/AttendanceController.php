@@ -29,20 +29,133 @@ class AttendanceController extends Controller
     // public function openAttendance(Request, $request)
     // {
 
-    // }
+    // }use Carbon\Carbon;
+
 
     public function addManualAttendance(Request $request)
     {
-        $manualAttendance = new Attendance;
-        $manualAttendance->class_code = $request->class_code;
-        $manualAttendance->faith_id = $request->faith_id;
-        $manualAttendance->date = $request->date;
-        $manualAttendance->time_in = $request->time_in;
-        $manualAttendance->status = $request->status;
-        $manualAttendance->save();
+        $classCode = $request->class_code;
+        $faithId = $request->faith_id;
+        $date = Carbon::parse($request->date);
+        $timeIn = $request->time_in;
+        $status = $request->status;
 
-        return response()->json(['message' => ''.$request->faith_id.' set to Present successfully']);
+        // Get the day of the week from the date
+        $day = $date->format('l');
+
+        // Get all the facilities for the given class code and day
+        $facilities = Facility::where('class_code', $classCode)
+            ->where('class_day', $day)
+            ->get();
+
+        if ($facilities->isNotEmpty()) {
+            $validSchedule = false;
+
+            foreach ($facilities as $facility) {
+                $startTime = Carbon::parse($facility->start_time, config('app.timezone'));
+                $endTime = Carbon::parse($facility->end_time, config('app.timezone'));
+
+                $parsedTimeIn = Carbon::parse($timeIn, config('app.timezone'));
+
+                if ($parsedTimeIn->between($startTime, $endTime)) {
+                    $existingRecord = Attendance::where('class_code', $classCode)
+                        ->where('faith_id', $faithId)
+                        ->where('date', $date->format('Y-m-d'))
+                        ->where('start_time', $facility->start_time)
+                        ->where('end_time', $facility->end_time)
+                        ->first();
+
+                    if ($existingRecord) {
+                        return response()->json(['message' => $faithId . ' attendance for the class schedule already exists.'], 422);
+                    }
+
+                    $validSchedule = true;
+
+                    // Create a new attendance record with the facility's start_time and end_time
+                    $manualAttendance = new Attendance;
+                    $manualAttendance->class_code = $classCode;
+                    $manualAttendance->faith_id = $faithId;
+                    $manualAttendance->date = $date->format('Y-m-d');
+                    $manualAttendance->start_time = $facility->start_time;
+                    $manualAttendance->end_time = $facility->end_time;
+                    $manualAttendance->time_in = $timeIn;
+                    $manualAttendance->status = $status;
+                    $manualAttendance->save();
+
+                    return response()->json(['message' => $faithId . ' set to Present successfully']);
+                }
+            }
+
+            if (!$validSchedule) {
+                return response()->json(['message' => 'Time In: ' . $timeIn . ' has no corresponding class schedule'], 422);
+            }
+        } else {
+            return response()->json(['message' => 'Invalid class_code or day.'], 422);
+        }
     }
+
+
+// public function addManualAttendance(Request $request)
+// {
+//     $classCode = $request->class_code;
+//     $faithId = $request->faith_id;
+//     $date = Carbon::parse($request->date);
+//     $timeIn = Carbon::parse($request->time_in, config('app.timezone'))->format('H:i:s');
+//     $status = $request->status;
+
+//     // Get the day of the week from the date
+//     $day = $date->format('l');
+
+//     // Get all the facilities for the given class code and day
+//     $facilities = Facility::where('class_code', $classCode)
+//         ->where('class_day', $day)
+//         ->get();
+
+//     if ($facilities->isNotEmpty()) {
+//         $validSchedule = false;
+
+//         foreach ($facilities as $facility) {
+//             $startTime = Carbon::parse($facility->start_time);
+//             $endTime = Carbon::parse($facility->end_time);
+
+//             if ($timeIn->between($startTime, $endTime)) {
+
+//                 $existingRecord = Attendance::where('class_code', $classCode)
+//                     ->where('faith_id', $faithId)
+//                     ->where('date', $date->format('Y-m-d'))
+//                     ->where('start_time', $facility->start_time)
+//                     ->where('end_time', $facility->end_time)
+//                     ->first();
+
+//                 if ($existingRecord) {
+//                     return response()->json(['message' => $faithId.' attendance for the class schedule already exists.'], 422);
+//                 }
+
+//                 $validSchedule = true;
+
+//                 // Create a new attendance record with the facility's start_time and end_time
+//                 $manualAttendance = new Attendance;
+//                 $manualAttendance->class_code = $classCode;
+//                 $manualAttendance->faith_id = $faithId;
+//                 $manualAttendance->date = $date->format('Y-m-d');
+//                 $manualAttendance->start_time = $facility->start_time;
+//                 $manualAttendance->end_time = $facility->end_time;
+//                 $manualAttendance->time_in = $timeIn->format('H:i:s');
+//                 $manualAttendance->status = $status;
+//                 $manualAttendance->save();
+
+//                 return response()->json(['message' => $faithId . ' set to Present successfully']);
+//             }
+//             return response()->json(['message' => 'Time In:'.$timeIn->format('H:i').' has no corresponding class schedule'], 422);
+//         }
+
+//         if (!$validSchedule) {
+//             return response()->json(['message' => 'Invalid time in for the given class_code and date.'], 422);
+//         }
+//     } else {
+//         return response()->json(['message' => 'Invalid class_code or day.'], 422);
+//     }
+// }
 
     //FUNCTION FOR GETTING STUDENTS BASED ON THE CLASS CODE
     public function getStudentAttendances(string $classCode, Request $request)

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Student;
+use League\Csv\Reader;
+use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
@@ -126,4 +128,88 @@ class StudentController extends Controller
     {
         //
     }
+
+    public function getSuperAdminAllStudents()
+    {
+        $studentCount = Student::all()
+                    ->count();
+
+    return response()->json([
+        'student_count' => $studentCount
+    ]);
+    }
+
+    public function bulkInsertFromCSV(Request $request)
+{
+    $file = $request->file('csv_file');
+
+    if ($file) {
+        $csv = Reader::createFromPath($file->getRealPath(), 'r');
+        $csv->setHeaderOffset(0); // Set the header offset if your CSV file has a header row
+
+         // Get the header row
+         $headers = $csv->getHeader();
+
+         // Check if the required columns exist
+         $requiredColumns = ['faith_id', 'std_lname', 'std_fname', 'std_course', 'std_level', 'std_section'];
+         $missingColumns = array_diff($requiredColumns, $headers);
+
+         if (!empty($missingColumns)) {
+             return response()->json([
+                 'message' => 'CSV file is missing the following required columns: ' . implode(', ', $missingColumns),
+             ], 400);
+         }
+
+        $records = $csv->getRecords();
+        $errors = [];
+        $insertedCount = 0;
+
+        foreach ($records as $record) {
+            $validator = Validator::make($record, [
+                'faith_id' => 'required|unique:students,faith_id',
+                'std_lname' => 'required',
+                'std_fname' => 'required',
+                'std_course' => 'required',
+                'std_level' => 'required',
+                'std_section' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[] = $validator->errors()->all();
+                continue;
+            }
+
+            $existingStudent = Student::where('faith_id', $record['faith_id'])->first();
+
+            if ($existingStudent) {
+                $errors[] = "A record with faith_id '{$record['faith_id']}' already exists.";
+                continue;
+            }
+
+            Student::create([
+                'faith_id' => $record['faith_id'],
+                'std_lname' => $record['std_lname'],
+                'std_fname' => $record['std_fname'],
+                'std_course' => $record['std_course'],
+                'std_level' => $record['std_level'],
+                'std_section' => $record['std_section'],
+            ]);
+
+            $insertedCount++;
+        }
+
+        if (!empty($errors)) {
+            return response()->json([
+                'message' => 'Bulk insert completed with conflicts due to already existing students',
+                'inserted_count' => $insertedCount,
+                'errors' => $errors,
+            ], 206);
+        }
+
+        return response()->json(['message' => 'Bulk insert successful', 'inserted_count' => $insertedCount]);
+    }
+
+    return response()->json(['message' => 'CSV file not provided'], 400);
+}
+
 }

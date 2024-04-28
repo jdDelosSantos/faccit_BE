@@ -146,4 +146,12 @@ class CancelClassController extends Controller
     {
         //
     }
+
+    public function getSuperAdminAllPendingCancel()
+    {
+        $pending = RequestCancelClass::where('cancel_class_status', "Pending")
+        ->count();
+
+        return response()->json(['pending_cancel_count' => $pending]);
+    }
 }

@@ -35,10 +35,20 @@ Route::group([
 
     Route::get('professors', [App\Http\Controllers\UserController::class, 'index']);
     Route::get('getProfessors', [App\Http\Controllers\UserController::class, 'getProfessors']);
+    Route::get('prof_info/{prof_id}', [App\Http\Controllers\UserController::class, 'getProfessorInfo']);
+    Route::put('prof_info_update/{prof_id}', [App\Http\Controllers\UserController::class, 'update']);
     Route::post('professors', [App\Http\Controllers\UserController::class, 'store']);
-    Route::put('update_professors/{prof_id}', [App\Http\Controllers\UserController::class, 'update']);
+    Route::post('update_pass_prof/{prof_id}', [App\Http\Controllers\UserController::class, 'updateProfPass']);
+    Route::put('update_professors/{prof_id}', [App\Http\Controllers\UserController::class, 'updateProfessorInfo']);
     Route::put('prof_deactivate/{prof_id}', [App\Http\Controllers\UserController::class, 'deactivateUser']);
     Route::put('prof_activate/{prof_id}', [App\Http\Controllers\UserController::class, 'activateUser']);
+
+
+
+    Route::get('super_admin_info/{email}', [App\Http\Controllers\UserController::class, 'getUserInfo']);
+    Route::put('super_admin_info_update/{email}', [App\Http\Controllers\UserController::class, 'updateUserInfo']);
+    Route::post('update_pass_super_admin/{email}', [App\Http\Controllers\UserController::class, 'updateUserPass']);
+    Route::put('reset_prof_pass/{prof_id}', [App\Http\Controllers\UserController::class, 'resetProfPass']);
 
 
     Route::get('students', [App\Http\Controllers\StudentController::class, 'index']);
@@ -46,7 +56,8 @@ Route::group([
     Route::put('update_students/{faith_id}', [App\Http\Controllers\StudentController::class, 'update']);
     Route::put('student_deactivate/{faith_id}', [App\Http\Controllers\StudentController::class, 'deactivateStudent']);
     Route::put('student_activate/{faith_id}', [App\Http\Controllers\StudentController::class, 'activateStudent']);
-
+    Route::post('bulk_insert', [App\Http\Controllers\StudentController::class, 'bulkInsertFromCSV']);
+    Route::post('bulk_insert_prof', [App\Http\Controllers\UserController::class, 'bulkInsertFromCSVProf']);
 
     Route::get('student_images', [App\Http\Controllers\StudentImageController::class, 'index']);
     Route::post('student_images', [App\Http\Controllers\StudentImageController::class, 'store']);
@@ -72,7 +83,11 @@ Route::group([
     Route::put('course_activate/{course_name}', [App\Http\Controllers\CourseController::class, 'activateCourse']);
 
     Route::get('classes', [App\Http\Controllers\ClassController::class, 'index']);
-    // Route::get('get_classes/{id}', [App\Http\Controllers\ClassController::class, 'getClassesForRequestMakeupClass']);
+    Route::get('super_admin_all_classes', [App\Http\Controllers\ClassController::class, 'getSuperAdminAllClasses']);
+    Route::get('super_admin_all_students', [App\Http\Controllers\StudentController::class, 'getSuperAdminAllStudents']);
+    Route::get('super_admin_all_pending_makeup', [App\Http\Controllers\MakeupClassController::class, 'getSuperAdminAllPendingMakeup']);
+    Route::get('super_admin_all_pending_cancel', [App\Http\Controllers\CancelClassController::class, 'getSuperAdminAllPendingCancel']);
+
 
     Route::post('classes', [App\Http\Controllers\ClassController::class, 'store']);
     Route::get('profClasses/{prof_id}', [App\Http\Controllers\ClassController::class, 'getClassesForProfessor']);

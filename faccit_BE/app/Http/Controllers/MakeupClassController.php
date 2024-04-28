@@ -167,7 +167,7 @@ class MakeupClassController extends Controller
 
 
         return response()->json([
-            'message' => 'Makeup class created and absent class deleted successfully.',
+            'message' => 'Makeup class approved successfully.',
         ], 200);
     } else {
         return response()->json([
@@ -187,4 +187,11 @@ class MakeupClassController extends Controller
         ]);
     }
 
+    public function getSuperAdminAllPendingMakeup()
+    {
+        $pending = RequestMakeupClass::where('makeup_class_status', "Pending")
+        ->count();
+
+        return response()->json(['pending_makeup_count' => $pending]);
+    }
 }

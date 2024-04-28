@@ -242,4 +242,14 @@ public function getClassSchedForAbsent(Request $request, string $id)
         'class_count' => $classCount
     ]);
     }
+
+    public function getSuperAdminAllClasses()
+    {
+        $classCount = Classes::all()
+                    ->count();
+
+    return response()->json([
+        'class_count' => $classCount
+    ]);
+    }
 }
