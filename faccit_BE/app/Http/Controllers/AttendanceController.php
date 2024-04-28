@@ -327,7 +327,7 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
                     $attendanceRecorded = true;
 
                     return response()->json([
-                        'prof_id' => $professorId,
+                        'id' => $professorId,
                         'time_in' => $time,
                         'class_code' => $classSchedule->class_code,
                         'status' => 'Successful'
@@ -406,6 +406,12 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
                 ]);
 
                 $attendanceRecorded = true;
+                return response()->json([
+                    'id' => $studentId,
+                    'time_in' => $time,
+                    'class_code' => $classSchedule->class_code,
+                    'status' => 'Successful'
+                ]);
             }
         }
     }
