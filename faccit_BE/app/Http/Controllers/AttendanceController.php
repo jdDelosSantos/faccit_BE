@@ -90,7 +90,7 @@ class AttendanceController extends Controller
                 return response()->json(['message' => 'Time In: ' . $timeIn . ' has no corresponding class schedule'], 422);
             }
         } else {
-            return response()->json(['message' => 'Invalid class_code or day.'], 422);
+            return response()->json(['message' => 'The day has no corresponding class schedule!'], 422);
         }
     }
 
@@ -251,6 +251,49 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
 
 
 
+    public function getAllStudentAttendances()
+    {
+        $date = $request->date;
+        $startTime = $request->start_time;
+        $endTime = $request->end_time;
+
+        // Retrieve the list of students enrolled in the class
+        $students = DB::table('class_students')
+            ->where('class_code', $classCode)
+            ->pluck('faith_id');
+
+        // Join the class_students table with attendances, classes, and students tables
+        $studentAttendances = DB::table('class_students')
+            ->join('students', 'class_students.faith_id', '=', 'students.faith_id')
+            ->leftJoin('attendances', function ($join) use ($classCode, $date, $startTime, $endTime) {
+                $join->on('class_students.faith_id', '=', 'attendances.faith_id')
+                    ->where('attendances.class_code', $classCode)
+                    ->whereDate('attendances.date', $date)
+                    ->whereTime('attendances.time_in', '>=', $startTime)
+                    ->whereTime('attendances.time_in', '<=', $endTime);
+            })
+            ->leftJoin('classes', 'class_students.class_code', '=', 'classes.class_code')
+            ->where('class_students.class_code', $classCode)
+            ->whereIn('class_students.faith_id', $students)
+            ->select(
+                'students.faith_id',
+                'students.std_fname',
+                'students.std_lname',
+                'students.std_course',
+                'students.std_level',
+                'students.std_section',
+                DB::raw("COALESCE(attendances.date, '{$date}') as date"),
+                'attendances.time_in',
+                DB::raw('COALESCE(attendances.status, "Absent") as status'),
+                'classes.class_name',
+                'classes.class_code'
+            )
+            ->get();
+
+        // Return the retrieved attendance records, class names, and student information as a JSON response
+        return response()->json($studentAttendances);
+    }
+
     //PRIVATE FUNCTION FOR DETERMINING THE ID
     private function isStudent($id)
     {
@@ -310,6 +353,20 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
                     ->whereBetween('time_in', [$classSchedule->start_time, $classSchedule->end_time])
                     ->exists();
 
+            if ($existingAttendance)
+            {
+                    $data = [
+                    "message" => [
+                      "id" => $professorId,
+                      "time_in" => $time,
+                      "class_code" => $classSchedule->class_code,
+                      "status" => "Class Already Open"
+                    ]
+                  ];
+
+                return response()->json($data);
+            }
+
                 if (!$existingAttendance) {
                     $attendanceData = [
                         'class_code' => $classSchedule->class_code,
@@ -326,12 +383,16 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
                     DB::table('professor_attendances')->insert($attendanceData);
                     $attendanceRecorded = true;
 
-                    return response()->json([
-                        'id' => $professorId,
-                        'time_in' => $time,
-                        'class_code' => $classSchedule->class_code,
-                        'status' => 'Successful'
-                    ]);
+                    $data = [
+                        "message" => [
+                            'id' => $professorId,
+                            'time_in' => $time,
+                            'class_code' => $classSchedule->class_code,
+                            'status' => 'Successful'
+                        ]
+                      ];
+
+                    return response()->json($data);
                 }
             }
         }
@@ -391,6 +452,20 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
             ->whereBetween('time_in', [$classSchedule->start_time, $classSchedule->end_time])
             ->exists();
 
+            if ($existingAttendance)
+            {
+                $data = [
+                    "message" => [
+                      "id" => $studentId,
+                      "time_in" => $time,
+                      "class_code" => $classSchedule->class_code,
+                      "status" => "Already Present"
+                    ]
+                  ];
+
+                return response()->json($data);
+            }
+
         if (!$existingAttendance) {
             if ($time >= $classSchedule->start_time && $time <= $classSchedule->end_time) {
                 DB::table('attendances')->insert([
@@ -406,12 +481,16 @@ public function getMonthStudentAttendances(string $class_code, Request $request)
                 ]);
 
                 $attendanceRecorded = true;
-                return response()->json([
-                    'id' => $studentId,
-                    'time_in' => $time,
-                    'class_code' => $classSchedule->class_code,
-                    'status' => 'Successful'
-                ]);
+                $data = [
+                    "message" => [
+                      "id" => $studentId,
+                      "time_in" => $time,
+                      "class_code" => $classCode,
+                      "status" => "Successful"
+                    ]
+                  ];
+
+                return response()->json($data);
             }
         }
     }

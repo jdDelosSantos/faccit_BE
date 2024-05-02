@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Classes;
+use Illuminate\Support\Facades\DB;
 
 class ClassController extends Controller
 {
@@ -201,14 +202,7 @@ public function getClassSchedForAbsent(Request $request, string $id)
         //
     }
 
-    public function getClassesForProfessor($profId)
-{
-    $classes = Classes::where('prof_id', $profId)
-        ->withCount('classStudents')
-        ->get();
 
-    return response()->json($classes);
-}
 
     public function getCountClassesForProfessor(string $prof_id)
     {
@@ -252,4 +246,35 @@ public function getClassSchedForAbsent(Request $request, string $id)
         'class_count' => $classCount
     ]);
     }
+
+    public function getClassesForProf($profId)
+    {
+        {
+            $classes = Classes::where('prof_id', $profId)
+                ->withCount('classStudents')
+                ->get();
+
+            return response()->json($classes);
+        }
+    }
+
+    public function getClassesForProfessor($profId)
+{
+    $classes = Classes::where('prof_id', $profId)
+        ->withCount('classStudents')
+        ->having('class_students_count', '>',0)
+        ->get();
+
+    return response()->json($classes);
+}
+
+public function getAllClassesWithProf()
+{
+    $classes = Classes::join('users', 'classes.prof_id', '=', 'users.prof_id')
+        ->select('classes.*', 'users.user_lastname', 'users.user_firstname', DB::raw('(SELECT COUNT(*) FROM class_students WHERE class_students.class_code = classes.class_code) AS class_students_count'))
+        ->having('class_students_count', '>', 0)
+        ->get();
+
+    return response()->json($classes);
+}
 }

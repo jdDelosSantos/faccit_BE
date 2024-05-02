@@ -91,6 +91,7 @@ Route::group([
 
     Route::post('classes', [App\Http\Controllers\ClassController::class, 'store']);
     Route::get('profClasses/{prof_id}', [App\Http\Controllers\ClassController::class, 'getClassesForProfessor']);
+    Route::get('prof_classes/{prof_id}', [App\Http\Controllers\ClassController::class, 'getClassesForProf']);
     Route::get('prof_all_classes/{prof_id}', [App\Http\Controllers\ClassController::class, 'getCountClassesForProfessor']);
     Route::get('prof_all_classes_pl/{prof_id}', [App\Http\Controllers\ClassController::class, 'getCountClassesForProfessorInPL']);
     Route::get('prof_all_classes_ml/{prof_id}', [App\Http\Controllers\ClassController::class, 'getCountClassesForProfessorInML']);
@@ -136,6 +137,10 @@ Route::group([
     Route::post('add_manual_attendance' , [App\Http\Controllers\AttendanceController::class, 'addManualAttendance']);
     Route::post('open_attendance', [App\Http\Controllers\AttendanceController::class, 'storeManualProfessorAttendance']);
     Route::get('get_open_class/{prof_id}', [App\Http\Controllers\AttendanceController::class, 'getOpenAttendances']);
+
+    Route::get('all_prof_classes', [App\Http\Controllers\ClassController::class, 'getAllClassesWithProf']);
+    Route::post('student_attendances/{classCode}' , [App\Http\Controllers\AttendanceController::class, 'getStudentAttendances']);
+
 });
 
 Route::group([
