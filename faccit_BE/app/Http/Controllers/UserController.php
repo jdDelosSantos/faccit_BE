@@ -16,15 +16,21 @@ class UserController extends Controller
      */
     public function index()
     {
-    $professors = User::where('role', 'admin')
+    $professors = User::where('role', 'user')
                       ->withCount('professorImages')
                       ->get();
     return response()->json($professors);
     }
 
+    public function getAdmins()
+    {
+        $admins = User::where('role', 'admin')->get();
+        return response()->json($admins);
+    }
+
     public function getProfessors()
     {
-    $professors = User::where('role', 'admin')
+    $professors = User::where('role', 'user')
     ->select('user_lastname', 'user_firstname','prof_id', 'user_status')
     ->get();
     return response()->json($professors);
@@ -38,9 +44,34 @@ class UserController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+    public function storeAdmin(Request $request)
+    {
+        $existingAdmin = User::where('email',$request->email)->first();
+
+        if ($existingAdmin) {
+            $profEmail = $existingAdmin->email;
+            return response()->json([
+              'message' => "Error! ".$profEmail." Already Exists!",
+            ], 409);
+          }
+
+        $admins = new User;
+        $admins->user_lastname = $request->user_lastname;
+        $admins->user_firstname = $request->user_firstname;
+        $admins->email= $request->email;
+        $password = "TempPassword123";
+        $admins->password = Hash::make($password);
+        $admins->role = "admin";
+        $admins->save();
+
+        $message=(object)[
+            "status"=>"1",
+            "message"=> "Successfully Added a New Admin!"
+        ];
+        return response()->json($message);
+    }
+
     public function store(Request $request)
     {
         $existingProfessor = User::where('prof_id', $request->prof_id)->orWhere('email',$request->email)->first();
@@ -59,7 +90,7 @@ class UserController extends Controller
         $users->email= $request->email;
         $password = "TempPassword123";
         $users->password = Hash::make($password);
-        $users->role = "admin";
+        $users->role = "user";
         $users->save();
 
         $message=(object)[
@@ -109,6 +140,33 @@ class UserController extends Controller
             return response()->json($message);
         }
 
+    }
+
+
+    public function deactivateAdmin(Request $request, int $id)
+    {
+        $deactivateUser = User::where('id', $id)->first();
+        $deactivateUser->user_status = $request->user_status;
+        $deactivateUser->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Disabled Admin!"
+        ];
+        return response()->json($message);
+    }
+
+    public function activateAdmin(Request $request, int $id)
+    {
+        $deactivateUser = User::where('id', $id)->first();
+        $deactivateUser->user_status = $request->user_status;
+        $deactivateUser->save();
+
+        $message = (object) [
+            "status" => "1",
+            "message" => "Successfully Enabled Admin!"
+        ];
+        return response()->json($message);
     }
 
     public function deactivateUser(Request $request, string $prof_id)
@@ -171,6 +229,23 @@ class UserController extends Controller
 
 
         return response()->json($profInfo);
+    }
+
+    public function updateAdminInfo(Request $request, int $id)
+    {
+        $prof= User::where('id', $id)
+            ->first();
+
+            if (!$prof){
+                return response()->json(['message' => 'Admin not found!'], 404);
+            }
+            else{
+                $prof->user_lastname = $request->user_lastname;
+                $prof->user_firstname = $request->user_firstname;
+                $prof->save();
+
+                return response()->json(['message' => 'Admin successfully updated!']);
+            }
     }
 
     public function updateProfessorInfo(Request $request, string $prof_id)
@@ -295,25 +370,133 @@ class UserController extends Controller
     }
 
 
+    public function resetAdminPass(int $id, Request $request)
+    {
+
+        $resetPass = User::where('id', $id)
+                    ->first();
+
+            if (!$resetPass){
+                return response()->json(['message' => 'Admin cannot be found!'], 404);
+            }
+
+            $newPassword = "TempPassword123";
+
+            // Check if the new password is the same as the current hashed password
+            if (Hash::check($newPassword, $resetPass->password)) {
+                return response()->json(['message' => 'The password is already at default.'], 400);
+            }
+                $resetPass->password = Hash::make($newPassword);
+                $resetPass->save();
+
+                return response()->json(['message' => 'Successfully reset password for Admin!']);
+    }
+
     public function bulkInsertFromCSVProf(Request $request)
+    {
+        $file = $request->file('csv_file');
+        if ($file) {
+            $csv = Reader::createFromPath($file->getRealPath(), 'r');
+            $csv->setHeaderOffset(0); // Set the header offset if your CSV file has a header row
+
+            // Get the header row
+            $headers = $csv->getHeader();
+
+            // Check if the required columns exist
+            $requiredColumns = ['user_lastname', 'user_firstname', 'prof_id', 'email'];
+            $missingColumns = array_diff($requiredColumns, $headers);
+            $extraColumns = array_diff($headers, $requiredColumns);
+
+            if (!empty($missingColumns) || !empty($extraColumns)) {
+                $message = '';
+                if (!empty($missingColumns)) {
+                    $message .= 'CSV file is missing the following required columns: ' . implode(', ', $missingColumns) . '. ';
+                }
+                if (!empty($extraColumns)) {
+                    $message .= 'CSV file contains the following extra columns: ' . implode(', ', $extraColumns) . '. ';
+                }
+                return response()->json(['message' => $message], 400);
+            }
+
+            $records = $csv->getRecords();
+            $errors = [];
+            $insertedCount = 0;
+            $password = "TempPassword123";
+            $hashPassword = Hash::make($password);
+            $role = "user";
+
+            foreach ($records as $record) {
+                $validator = Validator::make($record, [
+                    'user_lastname' => 'required',
+                    'user_firstname' => 'required',
+                    'prof_id' => 'required|string|unique:users,prof_id',
+                    'email' => 'required|unique:users,email',
+                ]);
+
+                if ($validator->fails()) {
+                    $errors[] = $validator->errors()->all();
+                    continue;
+                }
+
+                $existingUser = User::where('prof_id', $record['prof_id'])->orWhere('email', $record['email'])->first();
+                if ($existingUser) {
+                    $errors[] = "A record with prof_id '{$record['prof_id']}' or email '{$record['email']}' already exists.";
+                    continue;
+                }
+
+                $prof_id = $record['prof_id'];
+                $users = new User;
+                $users->user_lastname = $record['user_lastname'];
+                $users->user_firstname = $record['user_firstname'];
+                $users->prof_id = $prof_id;
+                $users->email = $record['email'];
+                $users->password = $hashPassword;
+                $users->role = $role;
+                $users->save();
+                $insertedCount++;
+            }
+
+            if (!empty($errors)) {
+                return response()->json([
+                    'message' => 'Bulk insert completed with conflicts due to already existing professors',
+                    'inserted_count' => $insertedCount,
+                    'errors' => $errors,
+                ], 206);
+            }
+
+            return response()->json(['message' => 'Bulk insert successful', 'inserted_count' => $insertedCount]);
+        }
+
+        return response()->json(['message' => 'CSV file not provided'], 400);
+    }
+
+
+
+public function bulkInsertFromCSVAdmin(Request $request)
 {
     $file = $request->file('csv_file');
     if ($file) {
         $csv = Reader::createFromPath($file->getRealPath(), 'r');
         $csv->setHeaderOffset(0); // Set the header offset if your CSV file has a header row
 
-         // Get the header row
-         $headers = $csv->getHeader();
+        // Get the header row
+        $headers = $csv->getHeader();
 
-         // Check if the required columns exist
-         $requiredColumns = ['user_lastname', 'user_firstname', 'prof_id', 'email'];
-         $missingColumns = array_diff($requiredColumns, $headers);
+        // Check if the required columns exist
+        $requiredColumns = ['user_lastname', 'user_firstname', 'email'];
+        $missingColumns = array_diff($requiredColumns, $headers);
+        $extraColumns = array_diff($headers, $requiredColumns);
 
-         if (!empty($missingColumns)) {
-             return response()->json([
-                 'message' => 'CSV file is missing the following required columns: ' . implode(', ', $missingColumns),
-             ], 400);
-         }
+        if (!empty($missingColumns) || !empty($extraColumns)) {
+            $message = '';
+            if (!empty($missingColumns)) {
+                $message .= 'CSV file is missing the following required columns: ' . implode(', ', $missingColumns) . '. ';
+            }
+            if (!empty($extraColumns)) {
+                $message .= 'CSV file contains the following extra columns: ' . implode(', ', $extraColumns) . '. ';
+            }
+            return response()->json(['message' => $message], 400);
+        }
 
         $records = $csv->getRecords();
         $errors = [];
@@ -324,36 +507,29 @@ class UserController extends Controller
 
         foreach ($records as $record) {
             $validator = Validator::make($record, [
-
                 'user_lastname' => 'required',
                 'user_firstname' => 'required',
-                'prof_id' => 'required|string|unique:users,prof_id',
                 'email' => 'required|unique:users,email',
             ]);
-
-
 
             if ($validator->fails()) {
                 $errors[] = $validator->errors()->all();
                 continue;
             }
 
-            $existingUser = User::where('prof_id', $record['prof_id'])->orWhere('email', $record['email'])->first();
+            $existingUser = User::where('email', $record['email'])->first();
             if ($existingUser) {
-                $errors[] = "A record with prof_id '{$record['prof_id']}' or email '{$record['email']}' already exists.";
+                $errors[] = "A record with email '{$record['email']}' already exists.";
                 continue;
             }
-            $prof_id = $record['prof_id'];
 
             $users = new User;
             $users->user_lastname = $record['user_lastname'];
             $users->user_firstname = $record['user_firstname'];
-            $users->prof_id = $prof_id;
-            $users->email= $record['email'];
+            $users->email = $record['email'];
             $users->password = $hashPassword;
-            $users->role= $role;
+            $users->role = $role;
             $users->save();
-
             $insertedCount++;
         }
 
@@ -370,5 +546,15 @@ class UserController extends Controller
 
     return response()->json(['message' => 'CSV file not provided'], 400);
 }
+
+
+    public function getAllProfessors()
+    {
+        $professors = User::where('role' , 'user')
+                    ->select('user_lastname', 'user_firstname', 'prof_id')
+                    ->get();
+
+                    return response()->json($professors);
+    }
 
 }

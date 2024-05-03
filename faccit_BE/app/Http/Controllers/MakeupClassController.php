@@ -63,6 +63,7 @@ class MakeupClassController extends Controller
         $makeupClass->class_day = $request->class_day;
         $makeupClass->start_time = $request->start_time;
         $makeupClass->end_time = $request->end_time;
+        $makeupClass->remarks = $request->remarks;
         $makeupClass->save();
 
         return response()->json(['message' => 'Makeup Class requested successfully']);

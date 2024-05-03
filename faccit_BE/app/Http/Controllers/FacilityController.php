@@ -161,4 +161,22 @@ class FacilityController extends Controller
 
     return response()->json($classSchedules);
 }
+
+    public function getSuperAdminAllPLClasses()
+    {
+
+            $pl_classes = Facility::where('laboratory', "lab_programming")
+            ->count();
+
+            return response()->json($pl_classes);
+
+    }
+
+    public function getSuperAdminAllMLClasses()
+    {
+        $ml_classes = Facility::where('laboratory', "lab_multimedia")
+            ->count();
+
+            return response()->json($ml_classes);
+    }
 }

@@ -53,6 +53,7 @@ class CancelClassController extends Controller
         $cancelClass->class_day = $request->class_day;
         $cancelClass->start_time = $request->start_time;
         $cancelClass->end_time = $request->end_time;
+        $cancelClass->remarks = $request->remarks;
         $cancelClass->save();
 
         return response()->json(['message' => 'Cancel Class requested successfully']);
